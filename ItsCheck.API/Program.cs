@@ -8,15 +8,13 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
-using ItsCheck.Application;
-using ItsCheck.Application.Interface;
 using ItsCheck.Domain.Enum;
 using ItsCheck.Domain.Identity;
-using ItsCheck.DTO;
 using ItsCheck.Persistence;
 using ItsCheck.Service;
 using ItsCheck.Service.Interface;
-
+using ItsCheck.DataAccess.Interface;
+using ItsCheck.DataAccess;
 
 namespace ItsCheck.API
 {
@@ -27,22 +25,15 @@ namespace ItsCheck.API
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
-            string databaseItsCheck = Environment.GetEnvironmentVariable("ItsCheck") ?? configuration.GetConnectionString("ItsCheck");
-            string databaseType = Environment.GetEnvironmentVariable("DatabaseType") ?? configuration.GetConnectionString("DatabaseType");
+            string databaseItsCheck = Environment.GetEnvironmentVariable("DatabaseConnection") ?? configuration.GetConnectionString("DatabaseConnection")!;
 
             Console.WriteLine("Inicio parametros da aplicação: \n");
-            Console.WriteLine($"(ItsCheck) String de conexao com banco de dados para ItsCheck: \n{databaseItsCheck} \n");
-            Console.WriteLine($"(DatabaseType) Tipo de banco de dados para ItsCheck: \n{databaseType} \n");
+            Console.WriteLine($"(DatabaseConnection) String de conexao com banco de dados para ItsCheck: \n{databaseItsCheck} \n");
             Console.WriteLine("Fim parametros da aplicação \n");
 
             builder.Services.AddDbContext<ItsCheckContext>(x =>
             {
-                if (databaseType == "MsSQL")
-                    x.UseSqlServer(databaseItsCheck);
-                else if (databaseType == "PostgreSQL")
-                    x.UseNpgsql(databaseItsCheck);
-                else
-                    throw new Exception("Nenhum tipo de banco de dados suportado escolhido! (MsSQL ou PostgreSQL)");
+                x.UseNpgsql(databaseItsCheck);
                 x.EnableSensitiveDataLogging();
                 x.EnableDetailedErrors();
             });
@@ -152,12 +143,7 @@ namespace ItsCheck.API
 
             builder.Services.AddHangfire(x =>
             {
-                if (databaseType == "MsSQL")
-                    x.UseSqlServerStorage(databaseItsCheck);
-                else if (databaseType == "PostgreSQL")
-                    x.UsePostgreSqlStorage(databaseItsCheck);
-                else
-                    throw new Exception("Nenhum tipo de banco de dados suportado escolhido! (MsSQL ou PostgreSQL)");
+                x.UsePostgreSqlStorage(databaseItsCheck);
             });
             builder.Services.AddHangfireServer(x => x.WorkerCount = 1);
 

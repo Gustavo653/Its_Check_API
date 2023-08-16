@@ -3,11 +3,11 @@ using Common.DTO;
 using Common.Functions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ItsCheck.Application.Interface;
 using ItsCheck.Domain.Enum;
 using ItsCheck.Domain.Identity;
 using ItsCheck.DTO;
 using ItsCheck.Service.Interface;
+using ItsCheck.DataAccess.Interface;
 
 namespace ItsCheck.Service
 {

@@ -1,9 +1,9 @@
 using Common.DTO;
 using Microsoft.EntityFrameworkCore;
-using ItsCheck.Application.Interface;
 using ItsCheck.Domain;
 using ItsCheck.DTO;
 using ItsCheck.Service.Interface;
+using ItsCheck.DataAccess.Interface;
 
 namespace ItsCheck.Service
 {
