@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="Hangfire.Core" Version="1.8.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.31.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.31.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common.DTO\Common.DTO.csproj" />
+    <ProjectReference Include="..\Common.Functions\Common.Functions.csproj" />
+    <ProjectReference Include="..\ItsCheck.Application\ItsCheck.Application.csproj" />
+    <ProjectReference Include="..\ItsCheck.Domain\ItsCheck.Domain.csproj" />
+    <ProjectReference Include="..\ItsCheck.DTO\ItsCheck.DTO.csproj" />
+  </ItemGroup>
+
+</Project>
