@@ -49,7 +49,7 @@ namespace ItsCheck.Service
             {
                 return await _userRepository.GetEntities()
                                             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
-                                            .FirstOrDefaultAsync(x => x.UserName == userName);
+                                            .FirstOrDefaultAsync(x => x.NormalizedUserName == userName.ToUpper());
             }
             catch (Exception ex)
             {

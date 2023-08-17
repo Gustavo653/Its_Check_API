@@ -7,13 +7,13 @@ using ItsCheck.DataAccess.Interface;
 
 namespace ItsCheck.Service
 {
-    public class CategoryService : ICategoryService
+    public class ChecklistService : IChecklistService
     {
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly IChecklistRepository _checklistRepository;
 
-        public CategoryService(ICategoryRepository categoryRepository)
+        public ChecklistService(IChecklistRepository checklistRepository)
         {
-            _categoryRepository = categoryRepository;
+            _checklistRepository = checklistRepository;
         }
 
         public async Task<ResponseDTO> Create(BasicDTO basicDTO)
@@ -21,20 +21,20 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var categoryExists = await _categoryRepository.GetEntities().AnyAsync(c => c.Name == basicDTO.Name);
-                if (categoryExists)
+                var checklistExists = await _checklistRepository.GetEntities().AnyAsync(c => c.Name == basicDTO.Name);
+                if (checklistExists)
                 {
-                    responseDTO.SetBadInput($"A categoria {basicDTO.Name} já existe!");
+                    responseDTO.SetBadInput($"O checklist {basicDTO.Name} já existe!");
                     return responseDTO;
                 }
-                var category = new Category
+                var checklist = new Checklist
                 {
                     Name = basicDTO.Name,
                     CreatedAt = DateTime.Now,
                 };
-                await _categoryRepository.InsertAsync(category);
-                await _categoryRepository.SaveChangesAsync();
-                responseDTO.Object = category;
+                await _checklistRepository.InsertAsync(checklist);
+                await _checklistRepository.SaveChangesAsync();
+                responseDTO.Object = checklist;
             }
             catch (Exception ex)
             {
@@ -48,16 +48,16 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
-                if (category == null)
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
+                if (checklist == null)
                 {
-                    responseDTO.SetBadInput($"A categoria {basicDTO.Name} não existe!");
+                    responseDTO.SetBadInput($"O checklist {basicDTO.Name} não existe!");
                     return responseDTO;
                 }
-                category.Name = basicDTO.Name;
-                category.UpdatedAt = DateTime.Now;
-                await _categoryRepository.SaveChangesAsync();
-                responseDTO.Object = category;
+                checklist.Name = basicDTO.Name;
+                checklist.UpdatedAt = DateTime.Now;
+                await _checklistRepository.SaveChangesAsync();
+                responseDTO.Object = checklist;
             }
             catch (Exception ex)
             {
@@ -71,15 +71,15 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
-                if (category == null)
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
+                if (checklist == null)
                 {
-                    responseDTO.SetBadInput($"A categoria com id: {id} não existe!");
+                    responseDTO.SetBadInput($"O checklist com id: {id} não existe!");
                     return responseDTO;
                 }
-                _categoryRepository.Delete(category);
-                await _categoryRepository.SaveChangesAsync();
-                responseDTO.Object = category;
+                _checklistRepository.Delete(checklist);
+                await _checklistRepository.SaveChangesAsync();
+                responseDTO.Object = checklist;
             }
             catch (Exception ex)
             {
@@ -93,7 +93,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                responseDTO.Object = await _categoryRepository.GetEntities().ToListAsync();
+                responseDTO.Object = await _checklistRepository.GetEntities().ToListAsync();
             }
             catch (Exception ex)
             {

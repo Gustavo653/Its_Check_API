@@ -3,7 +3,7 @@ using ItsCheck.DTO;
 
 namespace ItsCheck.Service.Interface
 {
-    public interface ICategoryService
+    public interface IItemService
     {
         Task<ResponseDTO> Create(BasicDTO basicDTO);
         Task<ResponseDTO> Update(int id, BasicDTO basicDTO);

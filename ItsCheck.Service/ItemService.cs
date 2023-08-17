@@ -7,13 +7,13 @@ using ItsCheck.DataAccess.Interface;
 
 namespace ItsCheck.Service
 {
-    public class CategoryService : ICategoryService
+    public class ItemService : IItemService
     {
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly IItemRepository _itemRepository;
 
-        public CategoryService(ICategoryRepository categoryRepository)
+        public ItemService(IItemRepository itemRepository)
         {
-            _categoryRepository = categoryRepository;
+            _itemRepository = itemRepository;
         }
 
         public async Task<ResponseDTO> Create(BasicDTO basicDTO)
@@ -21,20 +21,20 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var categoryExists = await _categoryRepository.GetEntities().AnyAsync(c => c.Name == basicDTO.Name);
-                if (categoryExists)
+                var itemExists = await _itemRepository.GetEntities().AnyAsync(c => c.Name == basicDTO.Name);
+                if (itemExists)
                 {
-                    responseDTO.SetBadInput($"A categoria {basicDTO.Name} já existe!");
+                    responseDTO.SetBadInput($"O item {basicDTO.Name} já existe!");
                     return responseDTO;
                 }
-                var category = new Category
+                var item = new Item
                 {
                     Name = basicDTO.Name,
                     CreatedAt = DateTime.Now,
                 };
-                await _categoryRepository.InsertAsync(category);
-                await _categoryRepository.SaveChangesAsync();
-                responseDTO.Object = category;
+                await _itemRepository.InsertAsync(item);
+                await _itemRepository.SaveChangesAsync();
+                responseDTO.Object = item;
             }
             catch (Exception ex)
             {
@@ -48,16 +48,16 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
-                if (category == null)
+                var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
+                if (item == null)
                 {
-                    responseDTO.SetBadInput($"A categoria {basicDTO.Name} não existe!");
+                    responseDTO.SetBadInput($"O item {basicDTO.Name} não existe!");
                     return responseDTO;
                 }
-                category.Name = basicDTO.Name;
-                category.UpdatedAt = DateTime.Now;
-                await _categoryRepository.SaveChangesAsync();
-                responseDTO.Object = category;
+                item.Name = basicDTO.Name;
+                item.UpdatedAt = DateTime.Now;
+                await _itemRepository.SaveChangesAsync();
+                responseDTO.Object = item;
             }
             catch (Exception ex)
             {
@@ -71,15 +71,15 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
-                if (category == null)
+                var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
+                if (item == null)
                 {
-                    responseDTO.SetBadInput($"A categoria com id: {id} não existe!");
+                    responseDTO.SetBadInput($"O item com id: {id} não existe!");
                     return responseDTO;
                 }
-                _categoryRepository.Delete(category);
-                await _categoryRepository.SaveChangesAsync();
-                responseDTO.Object = category;
+                _itemRepository.Delete(item);
+                await _itemRepository.SaveChangesAsync();
+                responseDTO.Object = item;
             }
             catch (Exception ex)
             {
@@ -93,7 +93,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                responseDTO.Object = await _categoryRepository.GetEntities().ToListAsync();
+                responseDTO.Object = await _itemRepository.GetEntities().ToListAsync();
             }
             catch (Exception ex)
             {

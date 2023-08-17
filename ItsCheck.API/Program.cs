@@ -22,6 +22,8 @@ namespace ItsCheck.API
     {
         public static void Main(string[] args)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
@@ -45,8 +47,12 @@ namespace ItsCheck.API
             builder.Services.AddTransient<ITokenService, TokenService>();
             builder.Services.AddTransient<IAccountService, AccountService>();
             builder.Services.AddTransient<ICategoryService, CategoryService>();
+            builder.Services.AddTransient<IItemService, ItemService>();
+            builder.Services.AddTransient<IChecklistService, ChecklistService>();
             builder.Services.AddTransient<IUserRepository, UserRepository>();
             builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddTransient<IItemRepository, ItemRepository>();
+            builder.Services.AddTransient<IChecklistRepository, ChecklistRepository>();
             builder.Services.AddTransient<RoleManager<Role>>();
             builder.Services.AddTransient<UserManager<User>>();
 
