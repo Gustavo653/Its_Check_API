@@ -2,8 +2,7 @@
 {
     public enum RoleName
     {
-        Requester,
-        Agent,
+        Manager,
         Admin
     }
 }

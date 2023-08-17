@@ -177,7 +177,7 @@ namespace ItsCheck.API
         private static async Task SeedRoles(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
-            var roles = new List<string>() { RoleName.Requester.ToString(), RoleName.Agent.ToString(), RoleName.Admin.ToString() };
+            var roles = new List<string>() { RoleName.Manager.ToString(), RoleName.Admin.ToString() };
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
@@ -191,14 +191,12 @@ namespace ItsCheck.API
         {
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
             var adminEmail = "admin@admin.com";
-            var adminName = "Admin";
-            var adminPassword = "Admin@123";
 
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            var user = new User { Name = adminName, Email = adminEmail, UserName = adminName };
+            var user = new User { Name = "Admin", Email = adminEmail, UserName = "admin" };
             if (adminUser == null)
             {
-                await userManager.CreateAsync(user, adminPassword);
+                await userManager.CreateAsync(user, "Admin@123");
             }
             if (!await userManager.IsInRoleAsync(adminUser ?? user, RoleName.Admin.ToString()))
                 await userManager.AddToRoleAsync(adminUser ?? user, RoleName.Admin.ToString());

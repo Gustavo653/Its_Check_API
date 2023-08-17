@@ -16,16 +16,11 @@ namespace ItsCheck.Persistence
         {
         }
 
-        //public DbSet<Category> Categories { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            //modelBuilder.Entity<Category>(x =>
-            //{
-            //    x.HasIndex(a => a.Name).IsUnique();
-            //});
 
             modelBuilder.Entity<UserRole>(userRole =>
             {
