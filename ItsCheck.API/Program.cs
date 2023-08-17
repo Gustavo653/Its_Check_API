@@ -50,16 +50,13 @@ namespace ItsCheck.API
             builder.Services.AddTransient<RoleManager<Role>>();
             builder.Services.AddTransient<UserManager<User>>();
 
-            Task.Run(() =>
+            using (var serviceProvider = builder.Services.BuildServiceProvider())
             {
-                using (var serviceProvider = builder.Services.BuildServiceProvider())
-                {
-                    var dbContext = serviceProvider.GetService<ItsCheckContext>();
-                    dbContext.Database.Migrate();
-                    SeedRoles(serviceProvider).Wait();
-                    SeedAdminUser(serviceProvider).Wait();
-                }
-            });
+                var dbContext = serviceProvider.GetService<ItsCheckContext>();
+                dbContext.Database.Migrate();
+                SeedRoles(serviceProvider).Wait();
+                SeedAdminUser(serviceProvider).Wait();
+            }
 
             builder.Services.AddIdentityCore<User>(options =>
             {
@@ -88,7 +85,7 @@ namespace ItsCheck.API
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("TokenKey"))),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("TokenKey")!)),
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
@@ -197,13 +194,13 @@ namespace ItsCheck.API
             var adminPassword = "admin";
 
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            var user = new User { Name = adminPassword, Email = adminEmail, UserName = adminPassword };
+            var user = new User { Name = adminPassword, Email = adminEmail, UserName = adminPassword, SecurityStamp = "" };
             if (adminUser == null)
             {
                 await userManager.CreateAsync(user, adminPassword);
             }
             if (!await userManager.IsInRoleAsync(adminUser ?? user, RoleName.Admin.ToString()))
-                await userManager.AddToRoleAsync(adminUser ?? user, RoleName.Admin.ToString());
+                await userManager.AddToRoleAsync(adminUser ?? user, RoleName.Admin.ToString()); //adminUser ?? user
         }
     }
 }
