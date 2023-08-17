@@ -5,4 +5,4 @@ Microsoft.EntityFrameworkCore.Design
 
 
 Para criar migration:
-dotnet ef migrations add CreateDoctorPacient -p ItsCheck.Persistence -s ItsCheck.API -c ItsCheckContext --verbose
+dotnet ef migrations add Initial -p ItsCheck.Persistence -s ItsCheck.API -c ItsCheckContext --verbose

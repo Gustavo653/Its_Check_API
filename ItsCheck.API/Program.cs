@@ -191,16 +191,17 @@ namespace ItsCheck.API
         {
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
             var adminEmail = "admin@admin.com";
-            var adminPassword = "admin";
+            var adminName = "Admin";
+            var adminPassword = "Admin@123";
 
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            var user = new User { Name = adminPassword, Email = adminEmail, UserName = adminPassword, SecurityStamp = "" };
+            var user = new User { Name = adminName, Email = adminEmail, UserName = adminName };
             if (adminUser == null)
             {
                 await userManager.CreateAsync(user, adminPassword);
             }
             if (!await userManager.IsInRoleAsync(adminUser ?? user, RoleName.Admin.ToString()))
-                await userManager.AddToRoleAsync(adminUser ?? user, RoleName.Admin.ToString()); //adminUser ?? user
+                await userManager.AddToRoleAsync(adminUser ?? user, RoleName.Admin.ToString());
         }
     }
 }
