@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using ItsCheck.Domain.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace ItsCheck.DTO
 {

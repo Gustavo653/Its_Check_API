@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ItsCheck.Domain;
+using ItsCheck.Domain.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ItsCheck.Domain;
-using ItsCheck.Domain.Identity;
 
 namespace ItsCheck.Persistence
 {

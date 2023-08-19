@@ -1,11 +1,11 @@
 using Common.DTO;
-using Microsoft.EntityFrameworkCore;
+using ItsCheck.DataAccess.Interface;
 using ItsCheck.Domain;
+using ItsCheck.Domain.Identity;
 using ItsCheck.DTO;
 using ItsCheck.Service.Interface;
-using ItsCheck.DataAccess.Interface;
-using ItsCheck.Domain.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace ItsCheck.Service
 {
