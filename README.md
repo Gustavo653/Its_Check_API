@@ -1,24 +1,10 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Introdução 
+Its Check API
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+# Como executar o projeto?
+docker run -d --name postgresql --restart always -e POSTGRES_PASSWORD=sua_senha -v /var/lib/postgresql/data:/var/lib/postgresql/data -p 5432:5432 postgres:latest
+docker pull gustavo1rx7/its-check
+docker run -e DatabaseConnection="Host=localhost;Port=5432;Username=postgres;Password=sua_senha;Database=db-itscheck-prod;Pooling=true;" --restart always -d --name its-check-api -p 3000:80 gustavo1rx7/its-check
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
-
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
-
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
-
-
-
+# Como criar uma migration?
 dotnet ef migrations add Initial -p ItsCheck.Persistence -s ItsCheck.API -c ItsCheckContext --verbose
