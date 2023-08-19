@@ -55,10 +55,8 @@ namespace ItsCheck.Service
                     Checklist = checklist,
                     Item = item,
                     Category = category,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
                 };
-
+                checklistItem.SetCreatedAt();
                 await _checklistItemRepository.InsertAsync(checklistItem);
                 await _checklistItemRepository.SaveChangesAsync();
                 responseDTO.Object = checklistItem;
@@ -105,8 +103,8 @@ namespace ItsCheck.Service
                 checklistItem.Checklist = checklist;
                 checklistItem.Item = item;
                 checklistItem.Category = category;
-                checklistItem.UpdatedAt = DateTime.Now;
                 checklistItem.Checklist = checklist;
+                checklistItem.SetUpdatedAt();
 
                 await _checklistItemRepository.SaveChangesAsync();
                 responseDTO.Object = checklistItem;

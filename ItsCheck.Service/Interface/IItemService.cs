@@ -1,13 +1,10 @@
 using Common.DTO;
+using Common.Infrastructure;
 using ItsCheck.DTO;
 
 namespace ItsCheck.Service.Interface
 {
-    public interface IItemService
+    public interface IItemService : IServiceBase<BasicDTO>
     {
-        Task<ResponseDTO> Create(BasicDTO basicDTO);
-        Task<ResponseDTO> Update(int id, BasicDTO basicDTO);
-        Task<ResponseDTO> Remove(int id);
-        Task<ResponseDTO> GetList();
     }
 }

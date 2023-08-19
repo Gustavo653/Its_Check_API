@@ -4,7 +4,7 @@ using ItsCheck.DTO;
 
 namespace ItsCheck.Service.Interface
 {
-    public interface ICategoryService : IServiceBase<BasicDTO>
+    public interface IChecklistReviewService : IServiceBase<ChecklistReviewDTO>
     {
     }
 }

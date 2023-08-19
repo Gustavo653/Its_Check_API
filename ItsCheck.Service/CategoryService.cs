@@ -30,8 +30,8 @@ namespace ItsCheck.Service
                 var category = new Category
                 {
                     Name = basicDTO.Name,
-                    CreatedAt = DateTime.Now,
                 };
+                category.SetCreatedAt();
                 await _categoryRepository.InsertAsync(category);
                 await _categoryRepository.SaveChangesAsync();
                 responseDTO.Object = category;
@@ -55,7 +55,7 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
                 category.Name = basicDTO.Name;
-                category.UpdatedAt = DateTime.Now;
+                category.SetUpdatedAt();
                 await _categoryRepository.SaveChangesAsync();
                 responseDTO.Object = category;
             }

@@ -15,18 +15,15 @@ namespace ItsCheck.Service
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
         public AccountService(UserManager<User> userManager,
                               SignInManager<User> signInManager,
-                              IMapper mapper,
                               IUserRepository userRepository,
                               ITokenService tokenService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _mapper = mapper;
             _userRepository = userRepository;
             _tokenService = tokenService;
         }

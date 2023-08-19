@@ -30,8 +30,8 @@ namespace ItsCheck.Service
                 var checklist = new Checklist
                 {
                     Name = basicDTO.Name,
-                    CreatedAt = DateTime.Now,
                 };
+                checklist.SetCreatedAt();
                 await _checklistRepository.InsertAsync(checklist);
                 await _checklistRepository.SaveChangesAsync();
                 responseDTO.Object = checklist;
@@ -55,7 +55,7 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
                 checklist.Name = basicDTO.Name;
-                checklist.UpdatedAt = DateTime.Now;
+                checklist.SetUpdatedAt();
                 await _checklistRepository.SaveChangesAsync();
                 responseDTO.Object = checklist;
             }

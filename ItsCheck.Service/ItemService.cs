@@ -30,8 +30,8 @@ namespace ItsCheck.Service
                 var item = new Item
                 {
                     Name = basicDTO.Name,
-                    CreatedAt = DateTime.Now,
                 };
+                item.SetCreatedAt();
                 await _itemRepository.InsertAsync(item);
                 await _itemRepository.SaveChangesAsync();
                 responseDTO.Object = item;
@@ -55,7 +55,7 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
                 item.Name = basicDTO.Name;
-                item.UpdatedAt = DateTime.Now;
+                item.SetUpdatedAt();
                 await _itemRepository.SaveChangesAsync();
                 responseDTO.Object = item;
             }

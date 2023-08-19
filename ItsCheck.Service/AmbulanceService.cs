@@ -41,10 +41,8 @@ namespace ItsCheck.Service
                 {
                     Number = ambulanceDTO.Number,
                     Checklist = checklist,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
                 };
-
+                ambulance.SetCreatedAt();
                 await _ambulanceRepository.InsertAsync(ambulance);
                 await _ambulanceRepository.SaveChangesAsync();
                 responseDTO.Object = ambulance;
@@ -76,7 +74,7 @@ namespace ItsCheck.Service
                 }
 
                 ambulance.Number = ambulanceDTO.Number;
-                ambulance.UpdatedAt = DateTime.Now;
+                ambulance.SetUpdatedAt();
                 ambulance.Checklist = checklist;
 
                 await _ambulanceRepository.SaveChangesAsync();

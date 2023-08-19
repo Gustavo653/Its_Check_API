@@ -51,6 +51,7 @@ namespace ItsCheck.API
             builder.Services.AddScoped<IChecklistService, ChecklistService>();
             builder.Services.AddScoped<IAmbulanceService, AmbulanceService>();
             builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
+            builder.Services.AddScoped<IChecklistReviewService, ChecklistReviewService>();
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -58,6 +59,7 @@ namespace ItsCheck.API
             builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
             builder.Services.AddScoped<IAmbulanceRepository, AmbulanceRepository>();
             builder.Services.AddScoped<IChecklistItemRepository, ChecklistItemRepository>();
+            builder.Services.AddScoped<IChecklistReviewRepository, ChecklistReviewRepository>();
 
             builder.Services.AddScoped<RoleManager<Role>>();
             builder.Services.AddScoped<UserManager<User>>();
