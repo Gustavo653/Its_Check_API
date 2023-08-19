@@ -103,7 +103,6 @@ namespace ItsCheck.Service
                 checklistItem.Checklist = checklist;
                 checklistItem.Item = item;
                 checklistItem.Category = category;
-                checklistItem.Checklist = checklist;
                 checklistItem.SetUpdatedAt();
 
                 await _checklistItemRepository.SaveChangesAsync();
@@ -124,7 +123,7 @@ namespace ItsCheck.Service
                 var checklistItem = await _checklistItemRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
                 if (checklistItem == null)
                 {
-                    responseDTO.SetBadInput($"A ambulância com id: {id} não existe!");
+                    responseDTO.SetBadInput($"O item do checklist com id: {id} não existe!");
                     return responseDTO;
                 }
                 _checklistItemRepository.Delete(checklistItem);

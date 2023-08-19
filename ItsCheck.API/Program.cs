@@ -36,8 +36,11 @@ namespace ItsCheck.API
             builder.Services.AddDbContext<ItsCheckContext>(x =>
             {
                 x.UseNpgsql(databaseItsCheck);
-                x.EnableSensitiveDataLogging();
-                x.EnableDetailedErrors();
+                if (builder.Environment.IsDevelopment())
+                {
+                    x.EnableSensitiveDataLogging();
+                    x.EnableDetailedErrors();
+                }
             });
 
             builder.Services.AddIdentity<User, Role>()
@@ -52,6 +55,7 @@ namespace ItsCheck.API
             builder.Services.AddScoped<IAmbulanceService, AmbulanceService>();
             builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
             builder.Services.AddScoped<IChecklistReviewService, ChecklistReviewService>();
+            builder.Services.AddScoped<IChecklistAdjustedItemRepository, ChecklistAdjustedItemRepository>();
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -60,6 +64,7 @@ namespace ItsCheck.API
             builder.Services.AddScoped<IAmbulanceRepository, AmbulanceRepository>();
             builder.Services.AddScoped<IChecklistItemRepository, ChecklistItemRepository>();
             builder.Services.AddScoped<IChecklistReviewRepository, ChecklistReviewRepository>();
+            builder.Services.AddScoped<IChecklistAdjustedItemService, ChecklistAdjustedItemService>();
 
             builder.Services.AddScoped<RoleManager<Role>>();
             builder.Services.AddScoped<UserManager<User>>();
