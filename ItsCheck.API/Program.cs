@@ -44,17 +44,21 @@ namespace ItsCheck.API
                             .AddEntityFrameworkStores<ItsCheckContext>()
                             .AddDefaultTokenProviders();
 
-            builder.Services.AddTransient<ITokenService, TokenService>();
-            builder.Services.AddTransient<IAccountService, AccountService>();
-            builder.Services.AddTransient<ICategoryService, CategoryService>();
-            builder.Services.AddTransient<IItemService, ItemService>();
-            builder.Services.AddTransient<IChecklistService, ChecklistService>();
-            builder.Services.AddTransient<IUserRepository, UserRepository>();
-            builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
-            builder.Services.AddTransient<IItemRepository, ItemRepository>();
-            builder.Services.AddTransient<IChecklistRepository, ChecklistRepository>();
-            builder.Services.AddTransient<RoleManager<Role>>();
-            builder.Services.AddTransient<UserManager<User>>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IItemService, ItemService>();
+            builder.Services.AddScoped<IChecklistService, ChecklistService>();
+            builder.Services.AddScoped<IAmbulanceService, AmbulanceService>();
+
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<IItemRepository, ItemRepository>();
+            builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
+            builder.Services.AddScoped<IAmbulanceRepository, AmbulanceRepository>();
+
+            builder.Services.AddScoped<RoleManager<Role>>();
+            builder.Services.AddScoped<UserManager<User>>();
 
             using (var serviceProvider = builder.Services.BuildServiceProvider())
             {
