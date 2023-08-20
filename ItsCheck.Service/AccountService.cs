@@ -39,13 +39,13 @@ namespace ItsCheck.Service
             }
         }
 
-        private async Task<User?> GetUserByUserName(string userName)
+        private async Task<User?> GetUserByEmail(string email)
         {
             try
             {
                 return await _userRepository.GetEntities()
                                             .Include(x => x.UserRoles).ThenInclude(x => x.Role)
-                                            .FirstOrDefaultAsync(x => x.NormalizedUserName == userName.ToUpper());
+                                            .FirstOrDefaultAsync(x => x.NormalizedEmail == email.ToUpper());
             }
             catch (Exception ex)
             {
@@ -58,18 +58,18 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var user = await GetUserByUserName(userDTO.UserName);
+                var user = await GetUserByEmail(userDTO.Email);
                 if (user == null)
                 {
                     responseDTO.Code = 401;
-                    responseDTO.Message = "Não autenticado!";
+                    responseDTO.Message = "Não autenticado! Email inexistente!";
                     return responseDTO;
                 }
                 var password = await CheckUserPassword(user, userDTO);
                 if (!password.Succeeded)
                 {
                     responseDTO.Code = 401;
-                    responseDTO.Message = $"Não autenticado! {password}";
+                    responseDTO.Message = $"Não autenticado! {password}!";
                     return responseDTO;
                 }
 
@@ -88,12 +88,12 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
-        public async Task<ResponseDTO> GetCurrent(string userName)
+        public async Task<ResponseDTO> GetCurrent(string email)
         {
             ResponseDTO responseDTO = new();
             try
             {
-                responseDTO.Object = await GetUserByUserName(userName);
+                responseDTO.Object = await GetUserByEmail(email);
             }
             catch (Exception ex)
             {
@@ -107,7 +107,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var user = await _userManager.FindByNameAsync(userDTO.UserName);
+                var user = await _userManager.FindByEmailAsync(userDTO.Email);
                 if (user != null)
                 {
                     responseDTO.SetBadInput($"Já existe um usuário cadastrado com este e-mail: {userDTO.Email}!");

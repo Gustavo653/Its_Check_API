@@ -5,8 +5,9 @@ namespace ItsCheck.DTO
     public class UserLoginDTO
     {
         [Required]
-        public string UserName { get; set; } = null!;
+        [EmailAddress]
+        public required string Email { get; set; }
         [Required]
-        public string Password { get; set; } = null!;
+        public required string Password { get; set; }
     }
 }

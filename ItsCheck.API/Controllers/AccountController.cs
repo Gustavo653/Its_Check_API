@@ -19,7 +19,7 @@ namespace ItsCheck.API.Controllers
         [HttpGet("Current")]
         public async Task<IActionResult> GetUser()
         {
-            var user = await _accountService.GetCurrent(User.GetUserName());
+            var user = await _accountService.GetCurrent(User.GetEmail());
             return StatusCode(user.Code, user);
         }
 
