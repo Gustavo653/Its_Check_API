@@ -69,7 +69,7 @@ namespace ItsCheck.Service
                 if (!password.Succeeded)
                 {
                     responseDTO.Code = 401;
-                    responseDTO.Message = "Não autenticado!";
+                    responseDTO.Message = $"Não autenticado! {password}";
                     return responseDTO;
                 }
 

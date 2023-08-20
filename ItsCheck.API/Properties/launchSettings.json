@@ -6,7 +6,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "DatabaseConnection": "Server=localhost;Database=ItsCheckAPI;User Id=postgres;Password=UL^q^84Vcm83fYdgGdZu;Integrated Security=false;",
-        "DOTNET_ENVIRONMENT": "development"
+        "DOTNET_ENVIRONMENT": "production"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7007;http://localhost:5007"
@@ -17,6 +17,17 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "publishAllPorts": true,
       "useSSL": true
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "launchBrowser": true,
+      "launchUrl": "https://localhost:7007/swagger",
+      "environmentVariables": {
+        "ASPNETCORE_URLS": "https://localhost:7007;http://localhost:5007",
+        "DatabaseConnection": "Server=localhost;Database=ItsCheckAPI;User Id=postgres;Password=UL^q^84Vcm83fYdgGdZu;Integrated Security=false;",
+        "DOTNET_ENVIRONMENT": "development"
+      },
+      "distributionName": ""
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",

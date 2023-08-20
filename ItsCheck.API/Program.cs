@@ -29,9 +29,9 @@ namespace ItsCheck.API
 
             string databaseItsCheck = Environment.GetEnvironmentVariable("DatabaseConnection") ?? configuration.GetConnectionString("DatabaseConnection")!;
 
-            Console.WriteLine("Inicio parametros da aplicação: \n");
+            Console.WriteLine("Início dos parâmetros da aplicação \n");
             Console.WriteLine($"(DatabaseConnection) String de conexao com banco de dados para ItsCheck: \n{databaseItsCheck} \n");
-            Console.WriteLine("Fim parametros da aplicação \n");
+            Console.WriteLine("Fim dos parâmetros da aplicação \n");
 
             builder.Services.AddDbContext<ItsCheckContext>(x =>
             {
