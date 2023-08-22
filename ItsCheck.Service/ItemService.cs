@@ -3,6 +3,7 @@ using ItsCheck.DataAccess.Interface;
 using ItsCheck.Domain;
 using ItsCheck.DTO;
 using ItsCheck.Service.Interface;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace ItsCheck.Service
@@ -16,6 +17,49 @@ namespace ItsCheck.Service
             _itemRepository = itemRepository;
         }
 
+        public async Task<ResponseDTO> ImportCSV(IFormFile csvFile)
+        {
+            ResponseDTO responseDTO = new();
+            try
+            {
+                using (var reader = new StreamReader(csvFile.OpenReadStream()))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        var line = await reader.ReadLineAsync();
+                        var values = line.Split(',');
+
+                        if (values.Length < 1)
+                            continue;
+
+                        var itemName = values[0];
+
+                        var itemExists = await _itemRepository.GetEntities().AnyAsync(c => c.Name == itemName);
+                        if (itemExists)
+                        {
+                            responseDTO.SetBadInput($"O item {itemName} já existe!");
+                            return responseDTO;
+                        }
+
+                        var item = new Item
+                        {
+                            Name = itemName,
+                        };
+                        item.SetCreatedAt();
+                        await _itemRepository.InsertAsync(item);
+                    }
+
+                    await _itemRepository.SaveChangesAsync();
+                    responseDTO.Message = "Importação concluída com sucesso!";
+                }
+            }
+            catch (Exception ex)
+            {
+                responseDTO.SetError(ex);
+            }
+            return responseDTO;
+        }
+        
         public async Task<ResponseDTO> Create(BasicDTO basicDTO)
         {
             ResponseDTO responseDTO = new();

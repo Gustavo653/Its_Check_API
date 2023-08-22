@@ -22,6 +22,14 @@ namespace ItsCheck.API.Controllers
             var item = await _itemService.Create(name);
             return StatusCode(item.Code, item);
         }
+        
+        [HttpPost("Import")]
+        [Authorize(Roles = nameof(RoleName.Admin))]
+        public async Task<IActionResult> ImportCSV([FromForm] IFormFile csvFile)
+        {
+            var importResult = await _itemService.ImportCSV(csvFile);
+            return StatusCode(importResult.Code, importResult);
+        }
 
         [HttpPut("{id}")]
         [Authorize(Roles = nameof(RoleName.Admin))]
