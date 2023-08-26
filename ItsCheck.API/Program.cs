@@ -166,6 +166,8 @@ namespace ItsCheck.API
             builder.Services.AddMvc();
             builder.Services.AddRouting();
 
+            builder.Services.AddHealthChecks();
+
             var app = builder.Build();
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
@@ -189,6 +191,8 @@ namespace ItsCheck.API
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.MapHealthChecks("/health");
 
             app.Run();
         }
