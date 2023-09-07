@@ -76,6 +76,7 @@ namespace ItsCheck.Service
                 responseDTO.Object = new
                 {
                     userName = user.UserName,
+                    role = user.UserRoles.FirstOrDefault()?.Role.Name,
                     name = user.Name,
                     email = user.Email,
                     token = await _tokenService.CreateToken(user)
