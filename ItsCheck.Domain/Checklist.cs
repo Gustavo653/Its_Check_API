@@ -2,6 +2,7 @@
 {
     public class Checklist : BaseEntity
     {
-        public string Name { get; set; }
+        public required string Name { get; set; }
+        public virtual List<ChecklistItem> ChecklistItems { get; set; } = new List<ChecklistItem>();
     }
 }

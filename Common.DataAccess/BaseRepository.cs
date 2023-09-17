@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 namespace Common.DataAccess
 {
     public abstract class BaseRepository<TType, TContext>
-            where TType : class, new()
+            where TType : class
             where TContext : DbContext
     {
         protected readonly TContext _dbContext;
@@ -36,14 +36,6 @@ namespace Common.DataAccess
                                                                 .Attach(entity);
         public virtual void AttachRange(IEnumerable<TType> entity) => GetContext().Set<TType>()
                                                                                   .AttachRange(entity);
-        public virtual TType Clone(TType entity)
-        {
-            var ctx = GetContext();
-            var value = ctx.Entry(entity).CurrentValues.Clone();
-            var newEntity = new TType();
-            ctx.Entry(newEntity).CurrentValues.SetValues(value);
-            return newEntity;
-        }
 
         public virtual IEnumerable<EntityEntry> GetChanges()
         {

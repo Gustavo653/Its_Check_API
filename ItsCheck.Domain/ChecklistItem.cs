@@ -2,9 +2,9 @@
 {
     public class ChecklistItem : BaseEntity
     {
-        public int RequiredQuantity { get; set; }
-        public virtual Item Item { get; set; }
-        public virtual Category Category { get; set; }
-        public virtual Checklist Checklist { get; set; }
+        public required int RequiredQuantity { get; set; }
+        public required virtual Item Item { get; set; }
+        public required virtual Category Category { get; set; }
+        public required virtual Checklist Checklist { get; set; }
     }
 }

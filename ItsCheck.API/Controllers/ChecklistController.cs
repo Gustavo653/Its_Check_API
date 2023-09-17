@@ -17,17 +17,17 @@ namespace ItsCheck.API.Controllers
 
         [HttpPost("")]
         [Authorize(Roles = nameof(RoleName.Admin))]
-        public async Task<IActionResult> CreateChecklist([FromBody] BasicDTO name)
+        public async Task<IActionResult> CreateChecklist([FromBody] ChecklistDTO checklistDTO)
         {
-            var checklist = await _checklistService.Create(name);
+            var checklist = await _checklistService.Create(checklistDTO);
             return StatusCode(checklist.Code, checklist);
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = nameof(RoleName.Admin))]
-        public async Task<IActionResult> UpdateChecklist([FromRoute] int id, [FromBody] BasicDTO name)
+        public async Task<IActionResult> UpdateChecklist([FromRoute] int id, [FromBody] ChecklistDTO checklistDTO)
         {
-            var checklist = await _checklistService.Update(id, name);
+            var checklist = await _checklistService.Update(id, checklistDTO);
             return StatusCode(checklist.Code, checklist);
         }
 

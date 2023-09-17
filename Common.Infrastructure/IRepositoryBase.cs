@@ -18,7 +18,6 @@ namespace Common.Infrastructure
         IEnumerable<EntityEntry> GetChanges();
         void SeeChanges();
         void ClearChanges();
-        T Clone(T entity);
         Task<bool> SaveChangesAsync();
         Task<List<T>> GetListAsync();
         void Attach(T entity);

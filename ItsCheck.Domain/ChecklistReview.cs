@@ -5,10 +5,10 @@ namespace ItsCheck.Domain
 {
     public class ChecklistReview : BaseEntity
     {
-        public ReviewType Type { get; set; }
-        public string Observation { get; set; }
-        public virtual Ambulance Ambulance { get; set; }
-        public virtual Checklist Checklist { get; set; }
-        public virtual User User { get; set; }
+        public required ReviewType Type { get; set; }
+        public required string Observation { get; set; }
+        public required virtual Ambulance Ambulance { get; set; }
+        public required virtual Checklist Checklist { get; set; }
+        public required virtual User User { get; set; }
     }
 }
