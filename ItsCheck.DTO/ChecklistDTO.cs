@@ -10,15 +10,17 @@ namespace ItsCheck.DTO
     public class CategoryDTO
     {
         [Required]
-        public required int CategoryId { get; set; }
+        public required int Id { get; set; }
         [Required]
         public required virtual IEnumerable<ItemDTO> Items { get; set; }
     }
     public class ItemDTO
     {
         [Required]
-        public required int ItemId { get; set; }
+        public required int Id { get; set; }
         [Required]
         public required int Quantity { get; set; }
+        [Required]
+        public required int QuantityReplenished { get; set; }
     }
 }

@@ -20,12 +20,12 @@
   <Class Name="ItsCheck.Domain.Checklist">
     <Position X="12.25" Y="5.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAEAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Checklist.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ItsCheck.Domain.ChecklistAdjustedItem">
-    <Position X="13.5" Y="7.75" Width="2" />
+    <Position X="14" Y="7.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAgAAAEAAAAAAAAAAAAgAAAAAA=</HashCode>
       <FileName>ChecklistAdjustedItem.cs</FileName>
@@ -69,18 +69,21 @@
       <FileName>ChecklistReview.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
+      <Property Name="Type" />
       <Property Name="Ambulance" />
       <Property Name="Checklist" />
-      <Property Name="Type" />
       <Property Name="User" />
     </ShowAsAssociation>
   </Class>
   <Class Name="ItsCheck.Domain.Item">
     <Position X="10" Y="7.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Item.cs</FileName>
     </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="ChecklistAdjustedItems" />
+    </ShowAsCollectionAssociation>
   </Class>
   <Class Name="ItsCheck.Domain.Identity.User">
     <Position X="18" Y="2.5" Width="1.5" />

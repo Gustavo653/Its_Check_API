@@ -8,5 +8,6 @@ namespace ItsCheck.Service.Interface
     {
         Task<ResponseDTO> Create(ChecklistDTO checklistDTO);
         Task<ResponseDTO> Update(int id, ChecklistDTO checklistDTO);
+        Task<ResponseDTO> GetById(int id);
     }
 }
