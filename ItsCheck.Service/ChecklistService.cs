@@ -67,19 +67,35 @@ namespace ItsCheck.Service
                     id = checklist.Id,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
-                        .GroupBy(item => item.Category)
-                        .Select(categoryGroup => new
-                        {
-                            id = categoryGroup.Key.Id,
-                            name = categoryGroup.Key.Name,
-                            items = categoryGroup.Select(item => new
+                            .Select(item => new
                             {
-                                id = item.Item.Id,
-                                name = item.Item.Name,
-                                quantity = item.RequiredQuantity,
+                                id = item.Category.Id,
+                                name = item.Category.Name,
+                                items = new List<object>
+                                {
+                                    new
+                                    {
+                                        id = item.Item.Id,
+                                        name = item.Item.Name,
+                                        quantity = item.RequiredQuantity
+                                    }
+                                }
                             })
-                        })
-                });
+                }).GroupBy(checklist => new { checklist.id, checklist.name })
+                  .Select(groupedChecklist => new
+                  {
+                      groupedChecklist.Key.id,
+                      groupedChecklist.Key.name,
+                      categories = groupedChecklist
+                            .SelectMany(checklist => checklist.categories)
+                            .GroupBy(category => new { category.id, category.name })
+                            .Select(groupedCategory => new
+                            {
+                                groupedCategory.Key.id,
+                                groupedCategory.Key.name,
+                                items = groupedCategory.SelectMany(category => category.items)
+                            })
+                  });
 
                 responseDTO.Object = jsonData;
             }
@@ -116,8 +132,19 @@ namespace ItsCheck.Service
                     {
                         var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistAdjustedItems).FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
                         if (item == null) continue;
-                        item.ChecklistAdjustedItems?.Add(new ChecklistAdjustedItem() { Checklist = checklist, Item = item, Quantity = itemDTO.QuantityReplenished });
-                        checklist.ChecklistItems.Add(new ChecklistItem() { Category = category, Checklist = checklist, Item = item, RequiredQuantity = itemDTO.Quantity });
+                        item.ChecklistAdjustedItems?.Add(new ChecklistAdjustedItem()
+                        {
+                            Checklist = checklist,
+                            Item = item,
+                            Quantity = itemDTO.QuantityReplenished
+                        });
+                        checklist.ChecklistItems.Add(new ChecklistItem()
+                        {
+                            Category = category,
+                            Checklist = checklist,
+                            Item = item,
+                            RequiredQuantity = itemDTO.Quantity
+                        });
                     }
                 }
 
@@ -155,8 +182,19 @@ namespace ItsCheck.Service
                     {
                         var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistAdjustedItems).FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
                         if (item == null) continue;
-                        item.ChecklistAdjustedItems?.Add(new ChecklistAdjustedItem() { Checklist = checklist, Item = item, Quantity = itemDTO.QuantityReplenished });
-                        checklist.ChecklistItems.Add(new ChecklistItem() { Category = category, Checklist = checklist, Item = item, RequiredQuantity = itemDTO.Quantity });
+                        item.ChecklistAdjustedItems?.Add(new ChecklistAdjustedItem()
+                        {
+                            Checklist = checklist,
+                            Item = item,
+                            Quantity = itemDTO.QuantityReplenished
+                        });
+                        checklist.ChecklistItems.Add(new ChecklistItem()
+                        {
+                            Category = category,
+                            Checklist = checklist,
+                            Item = item,
+                            RequiredQuantity = itemDTO.Quantity
+                        });
                     }
                 }
 
@@ -174,14 +212,13 @@ namespace ItsCheck.Service
 
         public async Task<ResponseDTO> GetById(int id)
         {
-
             ResponseDTO responseDTO = new();
             try
             {
                 var checklist = await _checklistRepository.GetEntities()
-                                                           .Include(x => x.ChecklistItems).ThenInclude(x => x.Item)
-                                                           .Include(x => x.ChecklistItems).ThenInclude(x => x.Category)
-                                                           .FirstOrDefaultAsync(x => x.Id == id);
+                    .Include(x => x.ChecklistItems).ThenInclude(x => x.Item)
+                    .Include(x => x.ChecklistItems).ThenInclude(x => x.Category)
+                    .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (checklist == null)
                 {
@@ -194,18 +231,27 @@ namespace ItsCheck.Service
                     id = checklist.Id,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
-                                    .GroupBy(item => item.Category)
-                                    .Select(categoryGroup => new
-                                    {
-                                        id = categoryGroup.Key.Id,
-                                        name = categoryGroup.Key.Name,
-                                        items = categoryGroup.Select(item => new
-                                        {
-                                            id = item.Item.Id,
-                                            name = item.Item.Name,
-                                            quantity = item.RequiredQuantity,
-                                        })
-                                    })
+                    .Select(item => new
+                    {
+                        id = item.Category.Id,
+                        name = item.Category.Name,
+                        items = new List<object>
+                        {
+                            new
+                            {
+                                id = item.Item.Id,
+                                name = item.Item.Name,
+                                quantity = item.RequiredQuantity
+                            }
+                        }
+                    })
+                    .GroupBy(category => new { category.id, category.name })
+                    .Select(groupedCategory => new
+                    {
+                        groupedCategory.Key.id,
+                        groupedCategory.Key.name,
+                        items = groupedCategory.SelectMany(category => category.items)
+                    })
                 };
 
                 responseDTO.Object = jsonData;
