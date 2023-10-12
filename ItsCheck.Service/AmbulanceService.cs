@@ -114,7 +114,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                responseDTO.Object = await _ambulanceRepository.GetEntities().ToListAsync();
+                responseDTO.Object = await _ambulanceRepository.GetEntities().Include(x => x.Checklist).ToListAsync();
             }
             catch (Exception ex)
             {
