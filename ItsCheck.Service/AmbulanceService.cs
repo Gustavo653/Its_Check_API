@@ -30,7 +30,7 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var checklist = await _checklistRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == ambulanceDTO.IdChecklist);
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ambulanceDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {ambulanceDTO.IdChecklist} não existe!");
@@ -66,7 +66,7 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var checklist = await _checklistRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == ambulanceDTO.IdChecklist);
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ambulanceDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {ambulanceDTO.IdChecklist} não existe!");
