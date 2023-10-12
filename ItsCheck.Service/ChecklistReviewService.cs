@@ -32,13 +32,13 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklist = await _checklistRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdChecklist);
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistReviewDTO.IdChecklist} não existe!");
                     return responseDTO;
                 }
-                var ambulance = await _ambulanceRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdAmbulance);
+                var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdAmbulance);
                 if (ambulance == null)
                 {
                     responseDTO.SetBadInput($"A ambulância {checklistReviewDTO.IdAmbulance} não existe!");
@@ -84,13 +84,13 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var checklist = await _checklistRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdChecklist);
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistReviewDTO.IdChecklist} não existe!");
                     return responseDTO;
                 }
-                var ambulance = await _ambulanceRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdAmbulance);
+                var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdAmbulance);
                 if (ambulance == null)
                 {
                     responseDTO.SetBadInput($"A ambulância {checklistReviewDTO.IdAmbulance} não existe!");

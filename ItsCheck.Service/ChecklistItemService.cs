@@ -30,19 +30,19 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklist = await _checklistRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdChecklist);
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistItemDTO.IdChecklist} não existe!");
                     return responseDTO;
                 }
-                var item = await _itemRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdItem);
+                var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdItem);
                 if (item == null)
                 {
                     responseDTO.SetBadInput($"O item {checklistItemDTO.IdItem} não existe!");
                     return responseDTO;
                 }
-                var category = await _categoryRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdCategory);
+                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdCategory);
                 if (category == null)
                 {
                     responseDTO.SetBadInput($"A categoria {checklistItemDTO.IdCategory} não existe!");
@@ -80,19 +80,19 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var checklist = await _checklistRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdChecklist);
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistItemDTO.IdChecklist} não existe!");
                     return responseDTO;
                 }
-                var item = await _itemRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdItem);
+                var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdItem);
                 if (item == null)
                 {
                     responseDTO.SetBadInput($"O item {checklistItemDTO.IdItem} não existe!");
                     return responseDTO;
                 }
-                var category = await _categoryRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdCategory);
+                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistItemDTO.IdCategory);
                 if (category == null)
                 {
                     responseDTO.SetBadInput($"A categoria {checklistItemDTO.IdCategory} não existe!");

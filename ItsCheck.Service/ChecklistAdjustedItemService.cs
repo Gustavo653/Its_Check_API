@@ -27,13 +27,13 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklist = await _checklistRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistAdjustedItemDTO.IdChecklist);
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistAdjustedItemDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistAdjustedItemDTO.IdChecklist} não existe!");
                     return responseDTO;
                 }
-                var item = await _itemRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistAdjustedItemDTO.IdItem);
+                var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistAdjustedItemDTO.IdItem);
                 if (item == null)
                 {
                     responseDTO.SetBadInput($"O item {checklistAdjustedItemDTO.IdItem} não existe!");
@@ -70,13 +70,13 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var checklist = await _checklistRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistAdjustedItemDTO.IdChecklist);
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistAdjustedItemDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistAdjustedItemDTO.IdChecklist} não existe!");
                     return responseDTO;
                 }
-                var item = await _itemRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == checklistAdjustedItemDTO.IdItem);
+                var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistAdjustedItemDTO.IdItem);
                 if (item == null)
                 {
                     responseDTO.SetBadInput($"O item {checklistAdjustedItemDTO.IdItem} não existe!");
