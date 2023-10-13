@@ -11,10 +11,14 @@ namespace ItsCheck.Service
     public class ItemService : IItemService
     {
         private readonly IItemRepository _itemRepository;
+        private readonly IChecklistAdjustedItemRepository _checklistAdjustedItemRepository;
+        private readonly IChecklistItemRepository _checklistItemRepository;
 
-        public ItemService(IItemRepository itemRepository)
+        public ItemService(IItemRepository itemRepository, IChecklistAdjustedItemRepository checklistAdjustedItemRepository, IChecklistItemRepository checklistItemRepository)
         {
             _itemRepository = itemRepository;
+            _checklistAdjustedItemRepository = checklistAdjustedItemRepository;
+            _checklistItemRepository = checklistItemRepository;
         }
 
         public async Task<ResponseDTO> ImportCSV(IFormFile csvFile)
@@ -147,6 +151,20 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
+                var checklistAdjustedItemExists = await _checklistAdjustedItemRepository.GetEntities().AnyAsync(c => c.Item.Id == id);
+                if (checklistAdjustedItemExists)
+                {
+                    responseDTO.SetBadInput("Não é possível apagar o item, já existe uma reposição vinculada!");
+                    return responseDTO;
+                }
+
+                var checkListItemExists = await _checklistItemRepository.GetEntities().AnyAsync(c => c.Item.Id == id);
+                if (checklistAdjustedItemExists)
+                {
+                    responseDTO.SetBadInput("Não é possível apagar o item, já existe um item de checklist vinculado!");
+                    return responseDTO;
+                }
+
                 var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
                 if (item == null)
                 {

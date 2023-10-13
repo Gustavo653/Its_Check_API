@@ -10,10 +10,12 @@ namespace ItsCheck.Service
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IChecklistItemRepository _checklistItemRepository;
 
-        public CategoryService(ICategoryRepository categoryRepository)
+        public CategoryService(ICategoryRepository categoryRepository, IChecklistItemRepository checklistItemRepository)
         {
             _categoryRepository = categoryRepository;
+            _checklistItemRepository = checklistItemRepository;
         }
 
         public async Task<ResponseDTO> Create(BasicDTO basicDTO)
@@ -71,6 +73,13 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
+                var checkListItemExists = await _checklistItemRepository.GetEntities().AnyAsync(c => c.Category.Id == id);
+                if (checkListItemExists)
+                {
+                    responseDTO.SetBadInput("Não é possível apagar a categoria, já existe um item de checklist vinculado!");
+                    return responseDTO;
+                }
+
                 var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
                 if (category == null)
                 {
