@@ -12,12 +12,14 @@ namespace ItsCheck.Service
         private readonly IChecklistRepository _checklistRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IItemRepository _itemRepository;
+        private readonly IAmbulanceRepository _ambulanceRepository;
 
-        public ChecklistService(IChecklistRepository checklistRepository, ICategoryRepository categoryRepository, IItemRepository itemRepository)
+        public ChecklistService(IChecklistRepository checklistRepository, ICategoryRepository categoryRepository, IItemRepository itemRepository, IAmbulanceRepository ambulanceRepository)
         {
             _checklistRepository = checklistRepository;
             _categoryRepository = categoryRepository;
             _itemRepository = itemRepository;
+            _ambulanceRepository = ambulanceRepository;
         }
 
         public Task<ResponseDTO> Create(BasicDTO basicDTO)
@@ -35,6 +37,13 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
+                var ambulanceExists = await _ambulanceRepository.GetEntities().AnyAsync(x => x.Checklist.Id == id);
+                if (ambulanceExists)
+                {
+                    responseDTO.SetBadInput("Não é possível apagar o checklist, já existe uma ambulância vinculada!");
+                    return responseDTO;
+                }
+
                 var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
                 if (checklist == null)
                 {
