@@ -141,19 +141,24 @@ namespace ItsCheck.Service
                     {
                         var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistAdjustedItems).FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
                         if (item == null) continue;
-                        item.ChecklistAdjustedItems?.Add(new ChecklistAdjustedItem()
+                        
+                        var checlistAdjustedItem = new ChecklistAdjustedItem()
                         {
                             Checklist = checklist,
                             Item = item,
                             Quantity = itemDTO.QuantityReplenished
-                        });
-                        checklist.ChecklistItems.Add(new ChecklistItem()
+                        };
+                        checlistAdjustedItem.SetCreatedAt();
+                        item.ChecklistAdjustedItems?.Add(checlistAdjustedItem);
+                        var checklistItem = new ChecklistItem()
                         {
                             Category = category,
                             Checklist = checklist,
                             Item = item,
                             RequiredQuantity = itemDTO.Quantity
-                        });
+                        };
+                        checklistItem.SetCreatedAt();
+                        checklist.ChecklistItems.Add(checklistItem);
                     }
                 }
 
@@ -191,19 +196,24 @@ namespace ItsCheck.Service
                     {
                         var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistAdjustedItems).FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
                         if (item == null) continue;
-                        item.ChecklistAdjustedItems?.Add(new ChecklistAdjustedItem()
+                        
+                        var checlistAdjustedItem = new ChecklistAdjustedItem()
                         {
                             Checklist = checklist,
                             Item = item,
                             Quantity = itemDTO.QuantityReplenished
-                        });
-                        checklist.ChecklistItems.Add(new ChecklistItem()
+                        };
+                        checlistAdjustedItem.SetCreatedAt();
+                        item.ChecklistAdjustedItems?.Add(checlistAdjustedItem);
+                        var checklistItem = new ChecklistItem()
                         {
                             Category = category,
                             Checklist = checklist,
                             Item = item,
                             RequiredQuantity = itemDTO.Quantity
-                        });
+                        };
+                        checklistItem.SetCreatedAt();
+                        checklist.ChecklistItems.Add(checklistItem);
                     }
                 }
 
