@@ -9,6 +9,7 @@ namespace ItsCheck.DTO
         [Required] [EmailAddress] public required string Email { get; set; }
         public string? Password { get; set; }
         [Required] public required string Name { get; set; }
+        [Required] public required int IdAmbulance { get; set; }
         [Required] public required List<RoleName> Roles { get; set; }
     }
 }

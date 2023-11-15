@@ -3,6 +3,7 @@ using System;
 using ItsCheck.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ItsCheck.Persistence.Migrations
 {
     [DbContext(typeof(ItsCheckContext))]
-    partial class ItsCheckContextModelSnapshot : ModelSnapshot
+    [Migration("20231115231206_AlterUser")]
+    partial class AlterUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,7 +248,7 @@ namespace ItsCheck.Persistence.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AmbulanceId")
+                    b.Property<int?>("AmbulanceId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -524,9 +527,7 @@ namespace ItsCheck.Persistence.Migrations
                 {
                     b.HasOne("ItsCheck.Domain.Ambulance", "Ambulance")
                         .WithMany()
-                        .HasForeignKey("AmbulanceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AmbulanceId");
 
                     b.Navigation("Ambulance");
                 });

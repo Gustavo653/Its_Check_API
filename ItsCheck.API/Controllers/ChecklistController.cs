@@ -52,5 +52,12 @@ namespace ItsCheck.API.Controllers
             var checklist = await _checklistService.GetById(id);
             return StatusCode(checklist.Code, checklist);
         }
+        
+        [HttpGet("ByAmbulance/{id}")]
+        public async Task<IActionResult> GetByAmbulanceId([FromRoute] int id)
+        {
+            var checklist = await _checklistService.GetByAmbulanceId(id);
+            return StatusCode(checklist.Code, checklist);
+        }
     }
 }

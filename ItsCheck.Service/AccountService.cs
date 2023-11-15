@@ -16,15 +16,19 @@ namespace ItsCheck.Service
         private readonly SignInManager<User> _signInManager;
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
+        private readonly IAmbulanceRepository _ambulanceRepository;
+
         public AccountService(UserManager<User> userManager,
-                              SignInManager<User> signInManager,
-                              IUserRepository userRepository,
-                              ITokenService tokenService)
+            SignInManager<User> signInManager,
+            IUserRepository userRepository,
+            ITokenService tokenService,
+            IAmbulanceRepository ambulanceRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userRepository = userRepository;
             _tokenService = tokenService;
+            _ambulanceRepository = ambulanceRepository;
         }
 
         private async Task<SignInResult> CheckUserPassword(User user, UserLoginDTO userLoginDTO)
@@ -44,8 +48,9 @@ namespace ItsCheck.Service
             try
             {
                 return await _userRepository.GetEntities()
-                                            .Include(x => x.UserRoles).ThenInclude(x => x.Role)
-                                            .FirstOrDefaultAsync(x => x.NormalizedEmail == email.ToUpper());
+                    .Include(x => x.Ambulance)
+                    .Include(x => x.UserRoles).ThenInclude(x => x.Role)
+                    .FirstOrDefaultAsync(x => x.NormalizedEmail == email.ToUpper());
             }
             catch (Exception ex)
             {
@@ -65,6 +70,7 @@ namespace ItsCheck.Service
                     responseDTO.Message = "Não autenticado! Email inexistente!";
                     return responseDTO;
                 }
+
                 var password = await CheckUserPassword(user, userDTO);
                 if (!password.Succeeded)
                 {
@@ -79,6 +85,7 @@ namespace ItsCheck.Service
                     role = user.UserRoles.FirstOrDefault()?.Role.Name,
                     name = user.Name,
                     email = user.Email,
+                    ambulance = user.Ambulance,
                     token = await _tokenService.CreateToken(user)
                 };
             }
@@ -86,6 +93,7 @@ namespace ItsCheck.Service
             {
                 responseDTO.SetError(ex);
             }
+
             return responseDTO;
         }
 
@@ -100,6 +108,7 @@ namespace ItsCheck.Service
             {
                 responseDTO.SetError(ex);
             }
+
             return responseDTO;
         }
 
@@ -114,12 +123,25 @@ namespace ItsCheck.Service
                     responseDTO.SetBadInput($"Já existe um usuário cadastrado com este e-mail: {userDTO.Email}!");
                     return responseDTO;
                 }
+
                 if (userDTO.Password == null)
                 {
                     responseDTO.SetBadInput($"A senha deve ser preenchida");
                     return responseDTO;
                 }
-                var userEntity = new User();
+
+                var ambulance = await _ambulanceRepository.GetEntities()
+                    .FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
+                if (ambulance == null)
+                {
+                    responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
+                    return responseDTO;
+                }
+
+                var userEntity = new User
+                {
+                    Ambulance = ambulance
+                };
                 PropertyCopier<UserDTO, User>.Copy(userDTO, userEntity);
                 await _userManager.CreateAsync(userEntity, userDTO.Password);
                 foreach (var item in userDTO.Roles)
@@ -130,6 +152,7 @@ namespace ItsCheck.Service
             {
                 responseDTO.SetError(ex);
             }
+
             return responseDTO;
         }
 
@@ -144,13 +167,24 @@ namespace ItsCheck.Service
                     responseDTO.SetBadInput($"Usuário não encotrado com este id: {id}!");
                     return responseDTO;
                 }
+
+                var ambulance = await _ambulanceRepository.GetEntities()
+                    .FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
+                if (ambulance == null)
+                {
+                    responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
+                    return responseDTO;
+                }
+
                 PropertyCopier<UserDTO, User>.Copy(userDTO, userEntity);
+                userEntity.Ambulance = ambulance;
                 await _userManager.UpdateAsync(userEntity);
                 if (userDTO.Password != null)
                 {
                     await _userManager.RemovePasswordAsync(userEntity);
                     await _userManager.AddPasswordAsync(userEntity, userDTO.Password);
                 }
+
                 var userRoles = await _userManager.GetRolesAsync(userEntity);
                 await _userManager.RemoveFromRolesAsync(userEntity, userRoles);
                 foreach (var item in userDTO.Roles)
@@ -161,6 +195,7 @@ namespace ItsCheck.Service
             {
                 responseDTO.SetError(ex);
             }
+
             return responseDTO;
         }
 
@@ -175,6 +210,7 @@ namespace ItsCheck.Service
                     responseDTO.SetBadInput($"Usuário não encontrado com este id: {id}!");
                     return responseDTO;
                 }
+
                 var userRoles = await _userManager.GetRolesAsync(userEntity);
                 await _userManager.RemoveFromRolesAsync(userEntity, userRoles);
                 await _userManager.DeleteAsync(userEntity);
@@ -184,6 +220,7 @@ namespace ItsCheck.Service
             {
                 responseDTO.SetError(ex);
             }
+
             return responseDTO;
         }
 
@@ -211,6 +248,7 @@ namespace ItsCheck.Service
             {
                 responseDTO.SetError(ex);
             }
+
             return responseDTO;
         }
     }
