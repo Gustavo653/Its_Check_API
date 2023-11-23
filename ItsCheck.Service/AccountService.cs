@@ -130,8 +130,7 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var ambulance = await _ambulanceRepository.GetEntities()
-                    .FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
+                var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
                 if (ambulance == null)
                 {
                     responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
@@ -140,10 +139,18 @@ namespace ItsCheck.Service
 
                 var userEntity = new User
                 {
-                    Ambulance = ambulance
+                    Ambulance = ambulance,
+                    NormalizedEmail = userDTO.Email.ToUpper(),
+                    NormalizedUserName = userDTO.Email.ToUpper(),
                 };
+                userEntity.PasswordHash = _userManager.PasswordHasher.HashPassword(userEntity, userDTO.Password);
+
                 PropertyCopier<UserDTO, User>.Copy(userDTO, userEntity);
-                await _userManager.CreateAsync(userEntity, userDTO.Password);
+
+                await _userRepository.InsertAsync(userEntity);
+                await _userRepository.SaveChangesAsync();
+                await _userManager.UpdateSecurityStampAsync(userEntity);
+
                 foreach (var item in userDTO.Roles)
                     await AddUserInRole(userEntity, item);
                 responseDTO.Object = userEntity;
@@ -161,7 +168,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var userEntity = await _userManager.FindByIdAsync(id.ToString());
+                var userEntity = await _userRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == id);
                 if (userEntity == null)
                 {
                     responseDTO.SetBadInput($"Usuário não encotrado com este id: {id}!");
@@ -178,12 +185,9 @@ namespace ItsCheck.Service
 
                 PropertyCopier<UserDTO, User>.Copy(userDTO, userEntity);
                 userEntity.Ambulance = ambulance;
-                await _userManager.UpdateAsync(userEntity);
+
                 if (userDTO.Password != null)
-                {
-                    await _userManager.RemovePasswordAsync(userEntity);
-                    await _userManager.AddPasswordAsync(userEntity, userDTO.Password);
-                }
+                    userEntity.PasswordHash = _userManager.PasswordHasher.HashPassword(userEntity, userDTO.Password);
 
                 var userRoles = await _userManager.GetRolesAsync(userEntity);
                 await _userManager.RemoveFromRolesAsync(userEntity, userRoles);
