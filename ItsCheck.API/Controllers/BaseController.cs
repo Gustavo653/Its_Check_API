@@ -6,7 +6,8 @@ namespace ItsCheck.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class BaseController : ControllerBase
+    //[Route("api/[controller]/[action]")]
+    public abstract class BaseController : ControllerBase
     {
     }
 }

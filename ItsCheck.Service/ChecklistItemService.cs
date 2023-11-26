@@ -51,7 +51,7 @@ namespace ItsCheck.Service
 
                 var checklistItem = new ChecklistItem
                 {
-                    RequiredQuantity = checklistItemDTO.RequiredQuantity,
+                    AmountRequired = checklistItemDTO.AmountRequired,
                     Checklist = checklist,
                     Item = item,
                     Category = category,
@@ -99,7 +99,7 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                checklistItem.RequiredQuantity = checklistItemDTO.RequiredQuantity;
+                checklistItem.AmountRequired = checklistItemDTO.AmountRequired;
                 checklistItem.Checklist = checklist;
                 checklistItem.Item = item;
                 checklistItem.Category = category;

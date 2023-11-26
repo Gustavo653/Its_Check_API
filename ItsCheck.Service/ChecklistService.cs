@@ -89,7 +89,7 @@ namespace ItsCheck.Service
                                     {
                                         id = item.Item.Id,
                                         name = item.Item.Name,
-                                        quantity = item.RequiredQuantity
+                                        quantity = item.AmountRequired
                                     }
                                 }
                             })
@@ -145,24 +145,24 @@ namespace ItsCheck.Service
                     if (category == null) continue;
                     foreach (var itemDTO in categoryDTO.Items)
                     {
-                        var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistAdjustedItems)
+                        var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistReplacedItems)
                             .FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
                         if (item == null) continue;
 
-                        var checlistAdjustedItem = new ChecklistAdjustedItem()
+                        var checlistAdjustedItem = new ChecklistReplacedItem()
                         {
                             Checklist = checklist,
                             Item = item,
-                            Quantity = itemDTO.QuantityReplenished
+                            AmountReplaced = itemDTO.QuantityReplenished
                         };
                         checlistAdjustedItem.SetCreatedAt();
-                        item.ChecklistAdjustedItems?.Add(checlistAdjustedItem);
+                        item.ChecklistReplacedItems?.Add(checlistAdjustedItem);
                         var checklistItem = new ChecklistItem()
                         {
                             Category = category,
                             Checklist = checklist,
                             Item = item,
-                            RequiredQuantity = itemDTO.Quantity
+                            AmountRequired = itemDTO.Quantity
                         };
                         checklistItem.SetCreatedAt();
                         checklist.ChecklistItems.Add(checklistItem);
@@ -205,24 +205,24 @@ namespace ItsCheck.Service
                     if (category == null) continue;
                     foreach (var itemDTO in categoryDTO.Items)
                     {
-                        var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistAdjustedItems)
+                        var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistReplacedItems)
                             .FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
                         if (item == null) continue;
 
-                        var checlistAdjustedItem = new ChecklistAdjustedItem()
+                        var checlistAdjustedItem = new ChecklistReplacedItem()
                         {
                             Checklist = checklist,
                             Item = item,
-                            Quantity = itemDTO.QuantityReplenished
+                            AmountReplaced = itemDTO.QuantityReplenished
                         };
                         checlistAdjustedItem.SetCreatedAt();
-                        item.ChecklistAdjustedItems?.Add(checlistAdjustedItem);
+                        item.ChecklistReplacedItems?.Add(checlistAdjustedItem);
                         var checklistItem = new ChecklistItem()
                         {
                             Category = category,
                             Checklist = checklist,
                             Item = item,
-                            RequiredQuantity = itemDTO.Quantity
+                            AmountRequired = itemDTO.Quantity
                         };
                         checklistItem.SetCreatedAt();
                         checklist.ChecklistItems.Add(checklistItem);
@@ -273,7 +273,7 @@ namespace ItsCheck.Service
                                 {
                                     id = item.Item.Id,
                                     name = item.Item.Name,
-                                    quantity = item.RequiredQuantity
+                                    quantity = item.AmountRequired
                                 }
                             }
                         })

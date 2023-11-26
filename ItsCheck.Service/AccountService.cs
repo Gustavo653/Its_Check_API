@@ -82,7 +82,7 @@ namespace ItsCheck.Service
                 responseDTO.Object = new
                 {
                     userName = user.UserName,
-                    role = user.UserRoles.FirstOrDefault()?.Role.Name,
+                    role = user.UserRoles?.FirstOrDefault()?.Role.Name,
                     name = user.Name,
                     email = user.Email,
                     ambulance = user.Ambulance,
@@ -139,6 +139,7 @@ namespace ItsCheck.Service
 
                 var userEntity = new User
                 {
+                    Name = userDTO.Name,
                     Ambulance = ambulance,
                     NormalizedEmail = userDTO.Email.ToUpper(),
                     NormalizedUserName = userDTO.Email.ToUpper(),

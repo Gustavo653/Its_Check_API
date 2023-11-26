@@ -22,7 +22,7 @@ namespace ItsCheck.Persistence
         public DbSet<ChecklistItem> ChecklistItems { get; set; }
         public DbSet<Ambulance> Ambulances { get; set; }
         public DbSet<ChecklistReview> ChecklistReviews { get; set; }
-        public DbSet<ChecklistAdjustedItem> ChecklistAdjustedItems { get; set; }
+        public DbSet<ChecklistReplacedItem> ChecklistReplacedItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

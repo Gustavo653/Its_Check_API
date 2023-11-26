@@ -11,13 +11,13 @@ namespace ItsCheck.Service
     public class ItemService : IItemService
     {
         private readonly IItemRepository _itemRepository;
-        private readonly IChecklistAdjustedItemRepository _checklistAdjustedItemRepository;
+        private readonly IChecklistReplacedItemRepository _ChecklistReplacedItemRepository;
         private readonly IChecklistItemRepository _checklistItemRepository;
 
-        public ItemService(IItemRepository itemRepository, IChecklistAdjustedItemRepository checklistAdjustedItemRepository, IChecklistItemRepository checklistItemRepository)
+        public ItemService(IItemRepository itemRepository, IChecklistReplacedItemRepository ChecklistReplacedItemRepository, IChecklistItemRepository checklistItemRepository)
         {
             _itemRepository = itemRepository;
-            _checklistAdjustedItemRepository = checklistAdjustedItemRepository;
+            _ChecklistReplacedItemRepository = ChecklistReplacedItemRepository;
             _checklistItemRepository = checklistItemRepository;
         }
 
@@ -151,15 +151,15 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklistAdjustedItemExists = await _checklistAdjustedItemRepository.GetEntities().AnyAsync(c => c.Item.Id == id);
-                if (checklistAdjustedItemExists)
+                var ChecklistReplacedItemExists = await _ChecklistReplacedItemRepository.GetEntities().AnyAsync(c => c.Item.Id == id);
+                if (ChecklistReplacedItemExists)
                 {
                     responseDTO.SetBadInput("Não é possível apagar o item, já existe uma reposição vinculada!");
                     return responseDTO;
                 }
 
                 var checkListItemExists = await _checklistItemRepository.GetEntities().AnyAsync(c => c.Item.Id == id);
-                if (checklistAdjustedItemExists)
+                if (ChecklistReplacedItemExists)
                 {
                     responseDTO.SetBadInput("Não é possível apagar o item, já existe um item de checklist vinculado!");
                     return responseDTO;
