@@ -57,6 +57,17 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
+                var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
+                                                            .FirstOrDefaultAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
+                                                                                      x.Ambulance.Id == checklistReviewDTO.IdAmbulance &&
+                                                                                      x.Type == Domain.Enum.ReviewType.Initial);
+
+                if (checklistReviewInitialDuplicated != null)
+                {
+                    responseDTO.SetBadInput($"Um checklist inicial foi criado há pouco tempo ({checklistReviewInitialDuplicated.CreatedAt})!");
+                    return responseDTO;
+                }
+
                 var user = await _userManager.FindByIdAsync(checklistReviewDTO.IdUser.ToString());
                 if (user == null)
                 {
@@ -122,6 +133,7 @@ namespace ItsCheck.Service
             try
             {
                 var checklistReview = await _checklistReviewRepository.GetTrackedEntities()
+                                                                      .Include(x => x.ChecklistReplacedItems)
                                                                       .FirstOrDefaultAsync(c => c.Id == id);
                 if (checklistReview == null)
                 {
@@ -152,13 +164,11 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                checklistReview.Type = checklistReviewDTO.Type;
                 checklistReview.Observation = checklistReviewDTO.Observation;
                 checklistReview.Checklist = checklist;
                 checklistReview.Ambulance = ambulance;
-                checklistReview.User = user;
 
-                checklistReview.Checklist.ChecklistItems.RemoveAll(_ => true);
+                checklistReview.ChecklistReplacedItems?.RemoveAll(_ => true);
 
                 await ProcessChecklistReviewItems(checklistReviewDTO, checklistReview);
 

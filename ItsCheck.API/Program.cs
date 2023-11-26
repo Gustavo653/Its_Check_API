@@ -73,8 +73,8 @@ namespace ItsCheck.API
             {
                 var dbContext = serviceProvider.GetService<ItsCheckContext>();
                 dbContext.Database.Migrate();
-                //SeedRoles(serviceProvider).Wait();
-                //SeedAdminUser(serviceProvider).Wait();
+                SeedRoles(serviceProvider).Wait();
+                SeedAdminUser(serviceProvider).Wait();
             }
 
             builder.Services.AddIdentityCore<User>(options =>

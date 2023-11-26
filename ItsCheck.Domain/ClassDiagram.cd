@@ -30,7 +30,7 @@
       <Path>
         <Point X="15.25" Y="7.688" />
         <Point X="16.625" Y="7.688" />
-        <Point X="16.625" Y="4.483" />
+        <Point X="16.625" Y="4.675" />
       </Path>
     </AssociationLine>
     <AssociationLine Name="ChecklistItem" Type="ItsCheck.Domain.ChecklistItem" FixedFromPoint="true" FixedToPoint="true">
@@ -74,28 +74,28 @@
     <Position X="14.75" Y="3.25" Width="2" />
     <AssociationLine Name="Type" Type="ItsCheck.Domain.Enum.ReviewType" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="16.75" Y="4.25" />
-        <Point X="18.5" Y="4.25" />
+        <Point X="16.75" Y="4.406" />
+        <Point X="18.5" Y="4.406" />
         <Point X="18.5" Y="5.25" />
       </Path>
     </AssociationLine>
     <AssociationLine Name="Ambulance" Type="ItsCheck.Domain.Ambulance" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="14.75" Y="3.866" />
-        <Point X="14.375" Y="3.866" />
+        <Point X="14.75" Y="3.962" />
+        <Point X="14.375" Y="3.962" />
         <Point X="14.375" Y="2.312" />
         <Point X="13.75" Y="2.312" />
       </Path>
     </AssociationLine>
     <AssociationLine Name="Checklist" Type="ItsCheck.Domain.Checklist" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="15.25" Y="4.483" />
+        <Point X="15.25" Y="4.675" />
         <Point X="15.25" Y="5.619" />
         <Point X="14.25" Y="5.619" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAABAAAAAAAAAAAAAAAwAAAAAEAAAAAAAQAAAAAAAAA=</HashCode>
+      <HashCode>AAABAAEAAAAAAAAAAAAwAAAAAEAAAAAAAQAAAAAAAAA=</HashCode>
       <FileName>ChecklistReview.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
