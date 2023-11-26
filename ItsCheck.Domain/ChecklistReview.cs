@@ -10,5 +10,6 @@ namespace ItsCheck.Domain
         public required virtual Ambulance Ambulance { get; set; }
         public required virtual Checklist Checklist { get; set; }
         public required virtual User User { get; set; }
+        public List<ChecklistReplacedItem>? ChecklistReplacedItems { get; set; }
     }
 }

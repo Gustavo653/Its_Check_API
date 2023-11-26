@@ -3,7 +3,7 @@ using ItsCheck.DTO;
 
 namespace ItsCheck.Service.Interface
 {
-    public interface IChecklistAdjustedItemService : IServiceBase<ChecklistAdjustedItemDTO>
+    public interface IChecklistReplacedItemService : IServiceBase<ChecklistReplacedItemDTO>
     {
     }
 }

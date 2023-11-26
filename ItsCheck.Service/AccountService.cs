@@ -82,7 +82,7 @@ namespace ItsCheck.Service
                 responseDTO.Object = new
                 {
                     userName = user.UserName,
-                    role = user.UserRoles.FirstOrDefault()?.Role.Name,
+                    role = user.UserRoles?.FirstOrDefault()?.Role.Name,
                     name = user.Name,
                     email = user.Email,
                     ambulance = user.Ambulance,
@@ -131,7 +131,7 @@ namespace ItsCheck.Service
                 }
 
                 var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
-                if (ambulance == null)
+                if (ambulance == null && userDTO.Role != RoleName.Admin)
                 {
                     responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
                     return responseDTO;
@@ -139,6 +139,7 @@ namespace ItsCheck.Service
 
                 var userEntity = new User
                 {
+                    Name = userDTO.Name,
                     Ambulance = ambulance,
                     NormalizedEmail = userDTO.Email.ToUpper(),
                     NormalizedUserName = userDTO.Email.ToUpper(),
@@ -151,8 +152,7 @@ namespace ItsCheck.Service
                 await _userRepository.SaveChangesAsync();
                 await _userManager.UpdateSecurityStampAsync(userEntity);
 
-                foreach (var item in userDTO.Roles)
-                    await AddUserInRole(userEntity, item);
+                await AddUserInRole(userEntity, userDTO.Role);
                 responseDTO.Object = userEntity;
             }
             catch (Exception ex)
@@ -175,9 +175,8 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var ambulance = await _ambulanceRepository.GetEntities()
-                    .FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
-                if (ambulance == null)
+                var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
+                if (ambulance == null && userDTO.Role != RoleName.Admin)
                 {
                     responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
                     return responseDTO;
@@ -191,8 +190,8 @@ namespace ItsCheck.Service
 
                 var userRoles = await _userManager.GetRolesAsync(userEntity);
                 await _userManager.RemoveFromRolesAsync(userEntity, userRoles);
-                foreach (var item in userDTO.Roles)
-                    await AddUserInRole(userEntity, item);
+                await AddUserInRole(userEntity, userDTO.Role);
+
                 responseDTO.Object = userEntity;
             }
             catch (Exception ex)

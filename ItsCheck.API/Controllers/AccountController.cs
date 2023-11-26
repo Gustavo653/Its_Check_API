@@ -32,6 +32,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpGet("")]
+        [Authorize(Roles = nameof(RoleName.Admin))]
         public async Task<IActionResult> GetUsers()
         {
             var user = await _accountService.GetUsers();

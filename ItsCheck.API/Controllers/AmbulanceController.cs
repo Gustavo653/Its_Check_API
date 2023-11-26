@@ -40,7 +40,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> GetCategories()
+        public async Task<IActionResult> GetAmbulances()
         {
             var ambulance = await _ambulanceService.GetList();
             return StatusCode(ambulance.Code, ambulance);

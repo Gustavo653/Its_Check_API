@@ -46,6 +46,9 @@ namespace ItsCheck.Persistence.Migrations
 
                     b.HasIndex("ChecklistId");
 
+                    b.HasIndex("Number", "ChecklistId")
+                        .IsUnique();
+
                     b.ToTable("Ambulances");
                 });
 
@@ -68,6 +71,9 @@ namespace ItsCheck.Persistence.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Categories");
                 });
@@ -92,39 +98,10 @@ namespace ItsCheck.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Checklists");
-                });
-
-            modelBuilder.Entity("ItsCheck.Domain.ChecklistAdjustedItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ChecklistId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChecklistId");
-
-                    b.HasIndex("ItemId");
-
-                    b.ToTable("ChecklistAdjustedItems");
                 });
 
             modelBuilder.Entity("ItsCheck.Domain.ChecklistItem", b =>
@@ -134,6 +111,9 @@ namespace ItsCheck.Persistence.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AmountRequired")
+                        .HasColumnType("integer");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
@@ -147,9 +127,6 @@ namespace ItsCheck.Persistence.Migrations
                     b.Property<int>("ItemId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RequiredQuantity")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -159,9 +136,43 @@ namespace ItsCheck.Persistence.Migrations
 
                     b.HasIndex("ChecklistId");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("ItemId", "CategoryId", "ChecklistId")
+                        .IsUnique();
 
                     b.ToTable("ChecklistItems");
+                });
+
+            modelBuilder.Entity("ItsCheck.Domain.ChecklistReplacedItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AmountReplaced")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ChecklistItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ChecklistReviewId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChecklistReviewId");
+
+                    b.HasIndex("ChecklistItemId", "ChecklistReviewId")
+                        .IsUnique();
+
+                    b.ToTable("ChecklistReplacedItems");
                 });
 
             modelBuilder.Entity("ItsCheck.Domain.ChecklistReview", b =>
@@ -245,7 +256,7 @@ namespace ItsCheck.Persistence.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AmbulanceId")
+                    b.Property<int?>("AmbulanceId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -345,6 +356,9 @@ namespace ItsCheck.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Items");
                 });
 
@@ -439,31 +453,12 @@ namespace ItsCheck.Persistence.Migrations
             modelBuilder.Entity("ItsCheck.Domain.Ambulance", b =>
                 {
                     b.HasOne("ItsCheck.Domain.Checklist", "Checklist")
-                        .WithMany()
+                        .WithMany("Ambulances")
                         .HasForeignKey("ChecklistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Checklist");
-                });
-
-            modelBuilder.Entity("ItsCheck.Domain.ChecklistAdjustedItem", b =>
-                {
-                    b.HasOne("ItsCheck.Domain.Checklist", "Checklist")
-                        .WithMany()
-                        .HasForeignKey("ChecklistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ItsCheck.Domain.Item", "Item")
-                        .WithMany("ChecklistAdjustedItems")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Checklist");
-
-                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("ItsCheck.Domain.ChecklistItem", b =>
@@ -491,6 +486,25 @@ namespace ItsCheck.Persistence.Migrations
                     b.Navigation("Checklist");
 
                     b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("ItsCheck.Domain.ChecklistReplacedItem", b =>
+                {
+                    b.HasOne("ItsCheck.Domain.ChecklistItem", "ChecklistItem")
+                        .WithMany("ChecklistReplacedItems")
+                        .HasForeignKey("ChecklistItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ItsCheck.Domain.ChecklistReview", "ChecklistReview")
+                        .WithMany()
+                        .HasForeignKey("ChecklistReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChecklistItem");
+
+                    b.Navigation("ChecklistReview");
                 });
 
             modelBuilder.Entity("ItsCheck.Domain.ChecklistReview", b =>
@@ -524,9 +538,7 @@ namespace ItsCheck.Persistence.Migrations
                 {
                     b.HasOne("ItsCheck.Domain.Ambulance", "Ambulance")
                         .WithMany()
-                        .HasForeignKey("AmbulanceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AmbulanceId");
 
                     b.Navigation("Ambulance");
                 });
@@ -588,7 +600,14 @@ namespace ItsCheck.Persistence.Migrations
 
             modelBuilder.Entity("ItsCheck.Domain.Checklist", b =>
                 {
+                    b.Navigation("Ambulances");
+
                     b.Navigation("ChecklistItems");
+                });
+
+            modelBuilder.Entity("ItsCheck.Domain.ChecklistItem", b =>
+                {
+                    b.Navigation("ChecklistReplacedItems");
                 });
 
             modelBuilder.Entity("ItsCheck.Domain.Identity.Role", b =>
@@ -599,11 +618,6 @@ namespace ItsCheck.Persistence.Migrations
             modelBuilder.Entity("ItsCheck.Domain.Identity.User", b =>
                 {
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("ItsCheck.Domain.Item", b =>
-                {
-                    b.Navigation("ChecklistAdjustedItems");
                 });
 #pragma warning restore 612, 618
         }

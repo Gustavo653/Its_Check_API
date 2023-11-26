@@ -40,7 +40,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> GetCategories()
+        public async Task<IActionResult> GetChecklistItems()
         {
             var checklistItem = await _checklistItemService.GetList();
             return StatusCode(checklistItem.Code, checklistItem);

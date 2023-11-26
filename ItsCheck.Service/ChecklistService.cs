@@ -11,16 +11,21 @@ namespace ItsCheck.Service
     {
         private readonly IChecklistRepository _checklistRepository;
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IItemRepository _itemRepository;
         private readonly IAmbulanceRepository _ambulanceRepository;
+        private readonly IItemRepository _itemRepository;
+        private readonly IUserRepository _userRepository;
 
-        public ChecklistService(IChecklistRepository checklistRepository, ICategoryRepository categoryRepository,
-            IItemRepository itemRepository, IAmbulanceRepository ambulanceRepository)
+        public ChecklistService(IChecklistRepository checklistRepository,
+                                ICategoryRepository categoryRepository,
+                                IAmbulanceRepository ambulanceRepository,
+                                IItemRepository itemRepository,
+                                IUserRepository userRepository)
         {
             _checklistRepository = checklistRepository;
             _categoryRepository = categoryRepository;
-            _itemRepository = itemRepository;
             _ambulanceRepository = ambulanceRepository;
+            _itemRepository = itemRepository;
+            _userRepository = userRepository;
         }
 
         public Task<ResponseDTO> Create(BasicDTO basicDTO)
@@ -75,10 +80,10 @@ namespace ItsCheck.Service
                     .ToListAsync();
 
                 var jsonData = checklists.Select(checklist => new
-                    {
-                        id = checklist.Id,
-                        name = checklist.Name,
-                        categories = checklist.ChecklistItems
+                {
+                    id = checklist.Id,
+                    name = checklist.Name,
+                    categories = checklist.ChecklistItems
                             .Select(item => new
                             {
                                 id = item.Category.Id,
@@ -89,11 +94,11 @@ namespace ItsCheck.Service
                                     {
                                         id = item.Item.Id,
                                         name = item.Item.Name,
-                                        quantity = item.RequiredQuantity
+                                        quantity = item.AmountRequired
                                     }
                                 }
                             })
-                    }).GroupBy(checklist => new { checklist.id, checklist.name })
+                }).GroupBy(checklist => new { checklist.id, checklist.name })
                     .Select(groupedChecklist => new
                     {
                         groupedChecklist.Key.id,
@@ -124,8 +129,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklistExists =
-                    await _checklistRepository.GetEntities().AnyAsync(c => c.Name == checklistDTO.Name);
+                var checklistExists = await _checklistRepository.GetEntities().AnyAsync(c => c.Name == checklistDTO.Name);
                 if (checklistExists)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistDTO.Name} já existe!");
@@ -138,41 +142,12 @@ namespace ItsCheck.Service
                     ChecklistItems = new List<ChecklistItem>()
                 };
 
-                foreach (var categoryDTO in checklistDTO.Categories)
-                {
-                    var category = await _categoryRepository.GetTrackedEntities()
-                        .FirstOrDefaultAsync(x => x.Id == categoryDTO.Id);
-                    if (category == null) continue;
-                    foreach (var itemDTO in categoryDTO.Items)
-                    {
-                        var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistAdjustedItems)
-                            .FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
-                        if (item == null) continue;
-
-                        var checlistAdjustedItem = new ChecklistAdjustedItem()
-                        {
-                            Checklist = checklist,
-                            Item = item,
-                            Quantity = itemDTO.QuantityReplenished
-                        };
-                        checlistAdjustedItem.SetCreatedAt();
-                        item.ChecklistAdjustedItems?.Add(checlistAdjustedItem);
-                        var checklistItem = new ChecklistItem()
-                        {
-                            Category = category,
-                            Checklist = checklist,
-                            Item = item,
-                            RequiredQuantity = itemDTO.Quantity
-                        };
-                        checklistItem.SetCreatedAt();
-                        checklist.ChecklistItems.Add(checklistItem);
-                    }
-                }
+                await ProcessChecklistItems(checklistDTO, checklist);
 
                 checklist.SetCreatedAt();
                 await _checklistRepository.InsertAsync(checklist);
                 await _checklistRepository.SaveChangesAsync();
-                responseDTO.Object = checklist;
+                responseDTO.Object = checklistDTO;
             }
             catch (Exception ex)
             {
@@ -182,13 +157,37 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
+        private async Task ProcessChecklistItems(ChecklistDTO checklistDTO, Checklist checklist)
+        {
+            foreach (var categoryDTO in checklistDTO.Categories)
+            {
+                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == categoryDTO.Id);
+                if (category == null) continue;
+                foreach (var itemDTO in categoryDTO.Items)
+                {
+                    var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
+                    if (item == null) continue;
+                    var checklistItem = new ChecklistItem()
+                    {
+                        Category = category,
+                        Checklist = checklist,
+                        Item = item,
+                        AmountRequired = itemDTO.AmountRequired
+                    };
+                    checklistItem.SetCreatedAt();
+                    checklist.ChecklistItems.Add(checklistItem);
+                }
+            }
+        }
+
         public async Task<ResponseDTO> Update(int id, ChecklistDTO checklistDTO)
         {
             ResponseDTO responseDTO = new();
             try
             {
-                var checklist = await _checklistRepository.GetTrackedEntities().Include(x => x.ChecklistItems)
-                    .FirstOrDefaultAsync(c => c.Id == id);
+                var checklist = await _checklistRepository.GetTrackedEntities()
+                                                          .Include(x => x.ChecklistItems)
+                                                          .FirstOrDefaultAsync(c => c.Id == id);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistDTO.Name} não existe!");
@@ -196,38 +195,9 @@ namespace ItsCheck.Service
                 }
 
                 checklist.Name = checklistDTO.Name;
-                checklist.ChecklistItems.RemoveAll(x => 1 == 1);
+                checklist.ChecklistItems.RemoveAll(_ => true);
 
-                foreach (var categoryDTO in checklistDTO.Categories)
-                {
-                    var category = await _categoryRepository.GetTrackedEntities()
-                        .FirstOrDefaultAsync(x => x.Id == categoryDTO.Id);
-                    if (category == null) continue;
-                    foreach (var itemDTO in categoryDTO.Items)
-                    {
-                        var item = await _itemRepository.GetTrackedEntities().Include(x => x.ChecklistAdjustedItems)
-                            .FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
-                        if (item == null) continue;
-
-                        var checlistAdjustedItem = new ChecklistAdjustedItem()
-                        {
-                            Checklist = checklist,
-                            Item = item,
-                            Quantity = itemDTO.QuantityReplenished
-                        };
-                        checlistAdjustedItem.SetCreatedAt();
-                        item.ChecklistAdjustedItems?.Add(checlistAdjustedItem);
-                        var checklistItem = new ChecklistItem()
-                        {
-                            Category = category,
-                            Checklist = checklist,
-                            Item = item,
-                            RequiredQuantity = itemDTO.Quantity
-                        };
-                        checklistItem.SetCreatedAt();
-                        checklist.ChecklistItems.Add(checklistItem);
-                    }
-                }
+                await ProcessChecklistItems(checklistDTO, checklist);
 
                 checklist.SetUpdatedAt();
                 await _checklistRepository.SaveChangesAsync();
@@ -273,7 +243,7 @@ namespace ItsCheck.Service
                                 {
                                     id = item.Item.Id,
                                     name = item.Item.Name,
-                                    quantity = item.RequiredQuantity
+                                    quantity = item.AmountRequired
                                 }
                             }
                         })
@@ -301,8 +271,11 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklist = await _ambulanceRepository.GetEntities().Include(x => x.Checklist)
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                var checklist = await _userRepository.GetEntities()
+                                                     .Include(x => x.Ambulance).ThenInclude(x => x.Checklist)
+                                                     .Where(x => x.Id == id)
+                                                     .Select(x => x.Ambulance)
+                                                     .ToListAsync();
 
                 if (checklist == null)
                 {

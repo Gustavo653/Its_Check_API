@@ -22,27 +22,56 @@ namespace ItsCheck.Persistence
         public DbSet<ChecklistItem> ChecklistItems { get; set; }
         public DbSet<Ambulance> Ambulances { get; set; }
         public DbSet<ChecklistReview> ChecklistReviews { get; set; }
-        public DbSet<ChecklistAdjustedItem> ChecklistAdjustedItems { get; set; }
+        public DbSet<ChecklistReplacedItem> ChecklistReplacedItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<UserRole>(userRole =>
+            modelBuilder.Entity<UserRole>(x =>
             {
-                userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
+                x.HasKey(ur => new { ur.UserId, ur.RoleId });
 
-                userRole.HasOne(ur => ur.Role)
+                x.HasOne(ur => ur.Role)
                     .WithMany(r => r.UserRoles)
                     .HasForeignKey(ur => ur.RoleId)
                     .IsRequired();
 
-                userRole.HasOne(ur => ur.User)
+                x.HasOne(ur => ur.User)
                     .WithMany(r => r.UserRoles)
                     .HasForeignKey(ur => ur.UserId)
                     .IsRequired();
-            }
-           );
+            });
+
+            modelBuilder.Entity<Ambulance>(x =>
+            {
+                x.HasIndex(nameof(Ambulance.Number), $"{nameof(Ambulance.Checklist)}Id").IsUnique();
+            });
+
+            modelBuilder.Entity<Checklist>(x =>
+            {
+                x.HasIndex(a => a.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<ChecklistItem>(x =>
+            {
+                x.HasIndex($"{nameof(ChecklistItem.Item)}Id", $"{nameof(ChecklistItem.Category)}Id", $"{nameof(ChecklistItem.Checklist)}Id").IsUnique();
+            });
+
+            modelBuilder.Entity<Category>(x =>
+            {
+                x.HasIndex(a => a.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<Item>(x =>
+            {
+                x.HasIndex(a => a.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<ChecklistReplacedItem>(x =>
+            {
+                x.HasIndex($"{nameof(ChecklistReplacedItem.ChecklistItem)}Id", $"{nameof(ChecklistReplacedItem.ChecklistReview)}Id").IsUnique();
+            });
         }
     }
 }
