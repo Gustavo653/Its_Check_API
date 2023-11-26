@@ -26,6 +26,13 @@
   </Class>
   <Class Name="ItsCheck.Domain.ChecklistReplacedItem">
     <Position X="13.25" Y="7.25" Width="2" />
+    <AssociationLine Name="ChecklistReview" Type="ItsCheck.Domain.ChecklistReview" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="15.25" Y="7.688" />
+        <Point X="16.625" Y="7.688" />
+        <Point X="16.625" Y="4.483" />
+      </Path>
+    </AssociationLine>
     <AssociationLine Name="ChecklistItem" Type="ItsCheck.Domain.ChecklistItem" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="13.25" Y="8.016" />
@@ -34,20 +41,13 @@
         <Point X="10.75" Y="6.75" />
       </Path>
     </AssociationLine>
-    <AssociationLine Name="ChecklistReview" Type="ItsCheck.Domain.ChecklistReview" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="15.25" Y="7.688" />
-        <Point X="16.625" Y="7.688" />
-        <Point X="16.625" Y="4.483" />
-      </Path>
-    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAABCAA=</HashCode>
       <FileName>ChecklistReplacedItem.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Property Name="ChecklistItem" />
       <Property Name="ChecklistReview" />
+      <Property Name="ChecklistItem" />
     </ShowAsAssociation>
   </Class>
   <Class Name="ItsCheck.Domain.ChecklistItem">

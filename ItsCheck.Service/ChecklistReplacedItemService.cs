@@ -10,16 +10,19 @@ namespace ItsCheck.Service
     public class ChecklistReplacedItemService : IChecklistReplacedItemService
     {
         private readonly IChecklistReplacedItemRepository _ChecklistReplacedItemRepository;
-        private readonly IChecklistRepository _checklistRepository;
+        private readonly IChecklistReviewRepository _checklistReviewRepository;
         private readonly IItemRepository _itemRepository;
+        private IChecklistItemRepository _checklistItemRepository;
 
         public ChecklistReplacedItemService(IChecklistReplacedItemRepository ChecklistReplacedItemRepository,
-                                            IChecklistRepository checklistRepository,
-                                            IItemRepository itemRepository)
+                                            IChecklistReviewRepository checklistReviewRepository,
+                                            IItemRepository itemRepository,
+                                            IChecklistItemRepository checklistItemRepository)
         {
             _ChecklistReplacedItemRepository = ChecklistReplacedItemRepository;
-            _checklistRepository = checklistRepository;
+            _checklistReviewRepository = checklistReviewRepository;
             _itemRepository = itemRepository;
+            _checklistItemRepository = checklistItemRepository;
         }
 
         public async Task<ResponseDTO> Create(ChecklistReplacedItemDTO ChecklistReplacedItemDTO)
@@ -27,24 +30,24 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ChecklistReplacedItemDTO.IdChecklist);
-                if (checklist == null)
+                var checklistReview = await _checklistReviewRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ChecklistReplacedItemDTO.IdChecklistReview);
+                if (checklistReview == null)
                 {
-                    responseDTO.SetBadInput($"O checklist {ChecklistReplacedItemDTO.IdChecklist} não existe!");
+                    responseDTO.SetBadInput($"O checklist ajustado {ChecklistReplacedItemDTO.IdChecklistReview} não existe!");
                     return responseDTO;
                 }
-                var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ChecklistReplacedItemDTO.IdItem);
-                if (item == null)
+                var checklistItem = await _checklistItemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ChecklistReplacedItemDTO.IdChecklistItem);
+                if (checklistItem == null)
                 {
-                    responseDTO.SetBadInput($"O item {ChecklistReplacedItemDTO.IdItem} não existe!");
+                    responseDTO.SetBadInput($"O item {ChecklistReplacedItemDTO.IdChecklistItem} não existe!");
                     return responseDTO;
                 }
 
                 var ChecklistReplacedItem = new ChecklistReplacedItem
                 {
+                    ChecklistItem = checklistItem,
+                    ChecklistReview = checklistReview,
                     AmountReplaced = ChecklistReplacedItemDTO.AmountReplaced,
-                    Checklist = checklist,
-                    Item = item,
                 };
                 ChecklistReplacedItem.SetCreatedAt();
                 await _ChecklistReplacedItemRepository.InsertAsync(ChecklistReplacedItem);
@@ -70,22 +73,22 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ChecklistReplacedItemDTO.IdChecklist);
-                if (checklist == null)
+                var checklistReview = await _checklistReviewRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ChecklistReplacedItemDTO.IdChecklistReview);
+                if (checklistReview == null)
                 {
-                    responseDTO.SetBadInput($"O checklist {ChecklistReplacedItemDTO.IdChecklist} não existe!");
+                    responseDTO.SetBadInput($"O checklist {ChecklistReplacedItemDTO.IdChecklistReview} não existe!");
                     return responseDTO;
                 }
-                var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ChecklistReplacedItemDTO.IdItem);
-                if (item == null)
+                var checklistItem = await _checklistItemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ChecklistReplacedItemDTO.IdChecklistItem);
+                if (checklistItem == null)
                 {
-                    responseDTO.SetBadInput($"O item {ChecklistReplacedItemDTO.IdItem} não existe!");
+                    responseDTO.SetBadInput($"O item {ChecklistReplacedItemDTO.IdChecklistItem} não existe!");
                     return responseDTO;
                 }
 
                 ChecklistReplacedItem.AmountReplaced = ChecklistReplacedItemDTO.AmountReplaced;
-                ChecklistReplacedItem.Checklist = checklist;
-                ChecklistReplacedItem.Item = item;
+                ChecklistReplacedItem.ChecklistReview = checklistReview;
+                ChecklistReplacedItem.ChecklistItem = checklistItem;
                 ChecklistReplacedItem.SetUpdatedAt();
 
                 await _ChecklistReplacedItemRepository.SaveChangesAsync();

@@ -28,21 +28,25 @@ namespace ItsCheck.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<UserRole>(userRole =>
+            modelBuilder.Entity<UserRole>(x =>
             {
-                userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
+                x.HasKey(ur => new { ur.UserId, ur.RoleId });
 
-                userRole.HasOne(ur => ur.Role)
+                x.HasOne(ur => ur.Role)
                     .WithMany(r => r.UserRoles)
                     .HasForeignKey(ur => ur.RoleId)
                     .IsRequired();
 
-                userRole.HasOne(ur => ur.User)
+                x.HasOne(ur => ur.User)
                     .WithMany(r => r.UserRoles)
                     .HasForeignKey(ur => ur.UserId)
                     .IsRequired();
-            }
-           );
+            });
+
+            //modelBuilder.Entity<Ambulance>(x =>
+            //{
+            //    x.HasIndex(a => new { a.Number, a.Checklist }).IsUnique();
+            //});
         }
     }
 }

@@ -151,7 +151,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var ChecklistReplacedItemExists = await _ChecklistReplacedItemRepository.GetEntities().AnyAsync(c => c.Item.Id == id);
+                var ChecklistReplacedItemExists = await _ChecklistReplacedItemRepository.GetEntities().AnyAsync(c => c.ChecklistItem.Item.Id == id);
                 if (ChecklistReplacedItemExists)
                 {
                     responseDTO.SetBadInput("Não é possível apagar o item, já existe uma reposição vinculada!");
