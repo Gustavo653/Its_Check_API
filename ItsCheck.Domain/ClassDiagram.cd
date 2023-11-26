@@ -20,7 +20,7 @@
   <Class Name="ItsCheck.Domain.Checklist">
     <Position X="12.25" Y="5.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAEAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAEAAgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Checklist.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -90,8 +90,8 @@
     <AssociationLine Name="Checklist" Type="ItsCheck.Domain.Checklist" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="15.25" Y="4.483" />
-        <Point X="15.25" Y="5.575" />
-        <Point X="14.25" Y="5.575" />
+        <Point X="15.25" Y="5.619" />
+        <Point X="14.25" Y="5.619" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>

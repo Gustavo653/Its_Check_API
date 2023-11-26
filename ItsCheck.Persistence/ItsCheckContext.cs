@@ -43,10 +43,35 @@ namespace ItsCheck.Persistence
                     .IsRequired();
             });
 
-            //modelBuilder.Entity<Ambulance>(x =>
-            //{
-            //    x.HasIndex(a => new { a.Number, a.Checklist }).IsUnique();
-            //});
+            modelBuilder.Entity<Ambulance>(x =>
+            {
+                x.HasIndex(nameof(Ambulance.Number), $"{nameof(Ambulance.Checklist)}Id").IsUnique();
+            });
+
+            modelBuilder.Entity<Checklist>(x =>
+            {
+                x.HasIndex(a => a.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<ChecklistItem>(x =>
+            {
+                x.HasIndex($"{nameof(ChecklistItem.Item)}Id", $"{nameof(ChecklistItem.Category)}Id", $"{nameof(ChecklistItem.Checklist)}Id").IsUnique();
+            });
+
+            modelBuilder.Entity<Category>(x =>
+            {
+                x.HasIndex(a => a.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<Item>(x =>
+            {
+                x.HasIndex(a => a.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<ChecklistReplacedItem>(x =>
+            {
+                x.HasIndex($"{nameof(ChecklistReplacedItem.ChecklistItem)}Id", $"{nameof(ChecklistReplacedItem.ChecklistReview)}Id").IsUnique();
+            });
         }
     }
 }

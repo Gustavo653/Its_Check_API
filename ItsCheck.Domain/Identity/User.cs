@@ -6,6 +6,6 @@ namespace ItsCheck.Domain.Identity
     {
         public required string Name { get; set; }
         public Ambulance? Ambulance { get; set; }
-        public virtual IEnumerable<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public virtual IEnumerable<UserRole> UserRoles { get; set; }
     }
 }

@@ -3,6 +3,7 @@
     public class Checklist : BaseEntity
     {
         public required string Name { get; set; }
-        public required virtual List<ChecklistItem> ChecklistItems { get; set; }
+        public virtual List<ChecklistItem> ChecklistItems { get; set; }
+        public virtual List<Ambulance> Ambulances { get; set; }
     }
 }
