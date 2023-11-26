@@ -4,7 +4,7 @@
       "commandName": "Project",
       "launchUrl": "swagger",
       "environmentVariables": {
-        "DatabaseConnection": "Server=35.215.201.65;Database=db-itscheck-dev;User Id=postgres;Password=UL^q^84Vcm83fYdgGdZu;Integrated Security=false;",
+        "DatabaseConnection": "Server=localhost;Database=db-itscheck-dev;User Id=postgres;Password=UL^q^84Vcm83fYdgGdZu;Integrated Security=false;",
         "DOTNET_ENVIRONMENT": "development"
       },
       "dotnetRunMessages": true,
