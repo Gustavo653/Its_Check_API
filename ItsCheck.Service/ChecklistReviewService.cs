@@ -15,7 +15,6 @@ namespace ItsCheck.Service
         private readonly IChecklistRepository _checklistRepository;
         private readonly IAmbulanceRepository _ambulanceRepository;
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IItemRepository _itemRepository;
         private readonly IChecklistItemRepository _checklistItemRepository;
         private readonly UserManager<User> _userManager;
 
@@ -23,7 +22,6 @@ namespace ItsCheck.Service
                                       IChecklistRepository checklistRepository,
                                       IAmbulanceRepository ambulanceRepository,
                                       ICategoryRepository categoryRepository,
-                                      IItemRepository itemRepository,
                                       IChecklistItemRepository checklistItemRepository,
                                       UserManager<User> userManager)
         {
@@ -31,7 +29,6 @@ namespace ItsCheck.Service
             _checklistRepository = checklistRepository;
             _ambulanceRepository = ambulanceRepository;
             _categoryRepository = categoryRepository;
-            _itemRepository = itemRepository;
             _checklistItemRepository = checklistItemRepository;
             _userManager = userManager;
         }
@@ -60,6 +57,7 @@ namespace ItsCheck.Service
                 var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
                                                             .FirstOrDefaultAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
                                                                                       x.Ambulance.Id == checklistReviewDTO.IdAmbulance &&
+                                                                                      x.User.Id == checklistReviewDTO.IdUser &&
                                                                                       x.Type == Domain.Enum.ReviewType.Initial);
 
                 if (checklistReviewInitialDuplicated != null)
@@ -90,7 +88,7 @@ namespace ItsCheck.Service
                 await ProcessChecklistReviewItems(checklistReviewDTO, checklistReview);
 
                 await _checklistReviewRepository.SaveChangesAsync();
-                responseDTO.Object = checklistReview;
+                responseDTO.Object = checklistReviewDTO;
             }
             catch (Exception ex)
             {

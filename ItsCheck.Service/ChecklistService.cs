@@ -11,21 +11,21 @@ namespace ItsCheck.Service
     {
         private readonly IChecklistRepository _checklistRepository;
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IChecklistItemRepository _checklistItemRepository;
         private readonly IAmbulanceRepository _ambulanceRepository;
         private readonly IItemRepository _itemRepository;
+        private readonly IUserRepository _userRepository;
 
         public ChecklistService(IChecklistRepository checklistRepository,
                                 ICategoryRepository categoryRepository,
-                                IChecklistItemRepository checklistItemRepository,
                                 IAmbulanceRepository ambulanceRepository,
-                                IItemRepository itemRepository)
+                                IItemRepository itemRepository,
+                                IUserRepository userRepository)
         {
             _checklistRepository = checklistRepository;
             _categoryRepository = categoryRepository;
-            _checklistItemRepository = checklistItemRepository;
             _ambulanceRepository = ambulanceRepository;
             _itemRepository = itemRepository;
+            _userRepository = userRepository;
         }
 
         public Task<ResponseDTO> Create(BasicDTO basicDTO)
@@ -147,7 +147,7 @@ namespace ItsCheck.Service
                 checklist.SetCreatedAt();
                 await _checklistRepository.InsertAsync(checklist);
                 await _checklistRepository.SaveChangesAsync();
-                responseDTO.Object = checklist;
+                responseDTO.Object = checklistDTO;
             }
             catch (Exception ex)
             {
@@ -271,8 +271,11 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklist = await _ambulanceRepository.GetEntities().Include(x => x.Checklist)
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                var checklist = await _userRepository.GetEntities()
+                                                     .Include(x => x.Ambulance).ThenInclude(x => x.Checklist)
+                                                     .Where(x => x.Id == id)
+                                                     .Select(x => x.Ambulance)
+                                                     .ToListAsync();
 
                 if (checklist == null)
                 {

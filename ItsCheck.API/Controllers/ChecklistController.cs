@@ -1,3 +1,4 @@
+using Common.Functions;
 using ItsCheck.Domain.Enum;
 using ItsCheck.DTO;
 using ItsCheck.Service.Interface;
@@ -53,10 +54,10 @@ namespace ItsCheck.API.Controllers
             return StatusCode(checklist.Code, checklist);
         }
         
-        [HttpGet("ByAmbulance/{id}")]
-        public async Task<IActionResult> GetByAmbulanceId([FromRoute] int id)
+        [HttpGet("ByUserAmbulance")]
+        public async Task<IActionResult> GetByAmbulanceId()
         {
-            var checklist = await _checklistService.GetByAmbulanceId(id);
+            var checklist = await _checklistService.GetByAmbulanceId(Convert.ToInt32(User.GetUserId()));
             return StatusCode(checklist.Code, checklist);
         }
     }

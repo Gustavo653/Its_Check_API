@@ -15,7 +15,6 @@ namespace ItsCheck.DTO
         public int IdChecklist { get; set; }
         [Required]
         public virtual required IList<CategoryReviewDTO> Categories { get; set; }
-        [Required]
         public int IdUser { get; set; }
     }
 
@@ -27,8 +26,10 @@ namespace ItsCheck.DTO
         public virtual required IEnumerable<ItemReviewDTO> Items { get; set; }
     }
 
-    public class ItemReviewDTO : ItemDTO
+    public class ItemReviewDTO
     {
+        [Required]
+        public required int Id { get; set; }
         [Required]
         public int AmountReplaced { get; set; }
     }
