@@ -221,6 +221,8 @@ namespace ItsCheck.Service
                                                                      .Select(x => new
                                                                      {
                                                                          x.Id,
+                                                                         x.CreatedAt,
+                                                                         x.UpdatedAt,
                                                                          x.Ambulance,
                                                                          x.Observation,
                                                                          User = x.User.Name,

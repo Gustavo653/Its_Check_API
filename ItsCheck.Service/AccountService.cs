@@ -244,6 +244,7 @@ namespace ItsCheck.Service
                     x.Name,
                     x.Email,
                     x.UserName,
+                    x.Ambulance,
                     roles = string.Join(",", x.UserRoles.Select(ur => ur.Role.NormalizedName))
                 }).ToListAsync();
             }
