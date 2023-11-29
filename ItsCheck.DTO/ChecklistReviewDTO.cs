@@ -7,8 +7,7 @@ namespace ItsCheck.DTO
     {
         [Required]
         public ReviewType Type { get; set; }
-        [Required]
-        public required string Observation { get; set; }
+        public string? Observation { get; set; }
         [Required]
         public int IdAmbulance { get; set; }
         [Required]

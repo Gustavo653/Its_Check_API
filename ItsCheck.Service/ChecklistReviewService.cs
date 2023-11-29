@@ -207,16 +207,36 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
-        public async Task<ResponseDTO> GetList()
+        public Task<ResponseDTO> GetList()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ResponseDTO> GetList(int? takeLast)
         {
             ResponseDTO responseDTO = new();
             try
             {
-                responseDTO.Object =
-                    await _checklistReviewRepository.GetEntities()
-                        .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Item)
-                        .Include(x => x.User)
-                        .ToListAsync();
+                responseDTO.Object = await _checklistReviewRepository.GetEntities()
+                                                                     .Select(x => new
+                                                                     {
+                                                                         x.Id,
+                                                                         x.Ambulance,
+                                                                         User = x.User.Name,
+                                                                         x.Checklist,
+                                                                         ChecklistReviews = x.ChecklistReplacedItems != null &&
+                                                                                            x.ChecklistReplacedItems.Any() ?
+                                                                                            x.ChecklistReplacedItems.Select(x => new
+                                                                                            {
+                                                                                                category = x.ChecklistItem.Category.Name,
+                                                                                                item = x.ChecklistItem.Item.Name,
+                                                                                                amountReplaced = x.AmountReplaced,
+                                                                                                amoutRequired = x.ChecklistItem.AmountRequired
+                                                                                            }) : null
+                                                                     })
+                                                                     .OrderByDescending(x => x.Id)
+                                                                     .Take(takeLast ?? 1000)
+                                                                     .ToListAsync();
             }
             catch (Exception ex)
             {

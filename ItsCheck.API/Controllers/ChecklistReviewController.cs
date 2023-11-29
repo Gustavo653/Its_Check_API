@@ -42,9 +42,9 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> GetChecklistReviews()
+        public async Task<IActionResult> GetChecklistReviews([FromQuery] int? takeLast)
         {
-            var checklistReview = await _checklistReviewService.GetList();
+            var checklistReview = await _checklistReviewService.GetList(takeLast);
             return StatusCode(checklistReview.Code, checklistReview);
         }
     }
