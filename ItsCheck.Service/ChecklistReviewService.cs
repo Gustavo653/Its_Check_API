@@ -110,7 +110,7 @@ namespace ItsCheck.Service
                     var item = await _checklistItemRepository.GetTrackedEntities()
                                                              .Include(x => x.ChecklistReplacedItems)
                                                              .Include(x => x.Item)
-                                                             .FirstOrDefaultAsync(x => x.Id == itemReviewDTO.Id);
+                                                             .FirstOrDefaultAsync(x => x.Item.Id == itemReviewDTO.Id);
                     if (item == null) continue;
 
                     var checklistReplacedItem = new ChecklistReplacedItem()
@@ -222,6 +222,7 @@ namespace ItsCheck.Service
                                                                      {
                                                                          x.Id,
                                                                          x.Ambulance,
+                                                                         x.Observation,
                                                                          User = x.User.Name,
                                                                          x.Checklist,
                                                                          ChecklistReviews = x.ChecklistReplacedItems != null &&
