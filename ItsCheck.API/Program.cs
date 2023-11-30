@@ -43,6 +43,11 @@ namespace ItsCheck.API
                 }
             });
 
+            builder.Services.AddHttpLogging(x =>
+            {
+                x.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
+            });
+
             builder.Services.AddIdentity<User, Role>()
                             .AddEntityFrameworkStores<ItsCheckContext>()
                             .AddDefaultTokenProviders();
@@ -171,6 +176,8 @@ namespace ItsCheck.API
 
             var app = builder.Build();
 
+            app.UseHttpLogging();
+
             //app.UseHangfireDashboard("/hangfire", new DashboardOptions
             //{
             //    Authorization = new[] { new HangfireAuthorizationFilter() },
@@ -185,7 +192,7 @@ namespace ItsCheck.API
 
             app.UseSwagger();
             app.UseSwaggerUI();
-            
+
             app.UseAuthentication();
             app.UseAuthorization();
 
