@@ -271,19 +271,46 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var checklist = await _userRepository.GetEntities()
-                                                     .Include(x => x.Ambulance).ThenInclude(x => x.Checklist)
-                                                     .Where(x => x.Id == id)
-                                                     .Select(x => x.Ambulance)
-                                                     .ToListAsync();
+                var user = await _userRepository.GetEntities()
+                    .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Category)
+                    .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Item)
+                        .FirstOrDefaultAsync(x => x.Id == id);
 
-                if (checklist == null)
+                if (user == null || user.Ambulance == null || user.Ambulance.Checklist == null)
                 {
                     responseDTO.SetNotFound();
                     return responseDTO;
                 }
 
-                responseDTO.Object = checklist;
+                var jsonData = new
+                {
+                    id = user.Ambulance?.Checklist.Id,
+                    name = user.Ambulance?.Checklist.Name,
+                    categories = user.Ambulance?.Checklist.ChecklistItems
+                        .Select(item => new
+                        {
+                            id = item.Category.Id,
+                            name = item.Category.Name,
+                            items = new List<object>
+                            {
+                                new
+                                {
+                                    id = item.Item.Id,
+                                    name = item.Item.Name,
+                                    quantity = item.AmountRequired
+                                }
+                            }
+                        })
+                        .GroupBy(category => new { category.id, category.name })
+                        .Select(groupedCategory => new
+                        {
+                            groupedCategory.Key.id,
+                            groupedCategory.Key.name,
+                            items = groupedCategory.SelectMany(category => category.items)
+                        })
+                };
+
+                responseDTO.Object = jsonData;
             }
             catch (Exception ex)
             {
