@@ -162,7 +162,7 @@ namespace ItsCheck.API
             //    x.UsePostgreSqlStorage(databaseItsCheck);
             //});
 
-            builder.Services.AddHangfireServer(x => x.WorkerCount = 1);
+            //builder.Services.AddHangfireServer(x => x.WorkerCount = 1);
 
             builder.Services.AddMvc();
             builder.Services.AddRouting();
