@@ -157,10 +157,11 @@ namespace ItsCheck.API
 
             builder.Services.AddCors();
 
-            builder.Services.AddHangfire(x =>
-            {
-                x.UsePostgreSqlStorage(databaseItsCheck);
-            });
+            //builder.Services.AddHangfire(x =>
+            //{
+            //    x.UsePostgreSqlStorage(databaseItsCheck);
+            //});
+
             builder.Services.AddHangfireServer(x => x.WorkerCount = 1);
 
             builder.Services.AddMvc();
@@ -170,10 +171,10 @@ namespace ItsCheck.API
 
             var app = builder.Build();
 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions
-            {
-                Authorization = new[] { new HangfireAuthorizationFilter() },
-            });
+            //app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            //{
+            //    Authorization = new[] { new HangfireAuthorizationFilter() },
+            //});
 
             app.UseCors(builder =>
             {
