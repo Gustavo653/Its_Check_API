@@ -47,5 +47,12 @@ namespace ItsCheck.API.Controllers
             var checklistReview = await _checklistReviewService.GetList(takeLast);
             return StatusCode(checklistReview.Code, checklistReview);
         }
+
+        [HttpGet("ExistsInitialChecklistReview")]
+        public async Task<IActionResult> ExistsChecklistReview()
+        {
+            var checklistReview = await _checklistReviewService.ExistsChecklistReview(Convert.ToInt32(User.GetUserId()));
+            return StatusCode(checklistReview.Code, checklistReview);
+        }
     }
 }

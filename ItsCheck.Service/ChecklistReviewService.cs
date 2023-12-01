@@ -16,6 +16,7 @@ namespace ItsCheck.Service
         private readonly IAmbulanceRepository _ambulanceRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IChecklistItemRepository _checklistItemRepository;
+        private readonly IUserRepository _userRepository;
         private readonly UserManager<User> _userManager;
 
         public ChecklistReviewService(IChecklistReviewRepository checklistReviewRepository,
@@ -23,6 +24,7 @@ namespace ItsCheck.Service
                                       IAmbulanceRepository ambulanceRepository,
                                       ICategoryRepository categoryRepository,
                                       IChecklistItemRepository checklistItemRepository,
+                                      IUserRepository userRepository,
                                       UserManager<User> userManager)
         {
             _checklistReviewRepository = checklistReviewRepository;
@@ -30,6 +32,7 @@ namespace ItsCheck.Service
             _ambulanceRepository = ambulanceRepository;
             _categoryRepository = categoryRepository;
             _checklistItemRepository = checklistItemRepository;
+            _userRepository = userRepository;
             _userManager = userManager;
         }
 
@@ -58,7 +61,8 @@ namespace ItsCheck.Service
                                                             .FirstOrDefaultAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
                                                                                       x.Ambulance.Id == checklistReviewDTO.IdAmbulance &&
                                                                                       x.User.Id == checklistReviewDTO.IdUser &&
-                                                                                      x.Type == Domain.Enum.ReviewType.Initial);
+                                                                                      x.Type == Domain.Enum.ReviewType.Initial &&
+                                                                                      checklistReviewDTO.Type == Domain.Enum.ReviewType.Initial);
 
                 if (checklistReviewInitialDuplicated != null)
                 {
@@ -243,6 +247,28 @@ namespace ItsCheck.Service
                                                                      .OrderByDescending(x => x.Id)
                                                                      .Take(takeLast ?? 1000)
                                                                      .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                responseDTO.SetError(ex);
+            }
+
+            return responseDTO;
+        }
+
+        public async Task<ResponseDTO> ExistsChecklistReview(int userId)
+        {
+            ResponseDTO responseDTO = new();
+            try
+            {
+                var user = await _userRepository.GetEntities().Include(x => x.Ambulance).FirstOrDefaultAsync(x => x.Id == userId);
+                var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
+                                             .AnyAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
+                                                            x.Ambulance.Id == user.Ambulance.Id &&
+                                                            x.User.Id == user.Id &&
+                                                            x.Type == Domain.Enum.ReviewType.Initial);
+
+                responseDTO.Object = checklistReviewInitialDuplicated;
             }
             catch (Exception ex)
             {

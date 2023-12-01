@@ -7,5 +7,6 @@ namespace ItsCheck.Service.Interface
     public interface IChecklistReviewService : IServiceBase<ChecklistReviewDTO>
     {
         Task<ResponseDTO> GetList(int? takeLast);
+        Task<ResponseDTO> ExistsChecklistReview(int userId);
     }
 }
