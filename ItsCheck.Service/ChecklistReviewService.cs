@@ -49,9 +49,15 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var ambulance = await _ambulanceRepository.GetTrackedEntities()
-                                                          .FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdAmbulance);
-                if (ambulance == null)
+                var user = await _userRepository.GetTrackedEntities().Include(x => x.Ambulance).FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdUser);
+
+                if (user == null)
+                {
+                    responseDTO.SetBadInput($"O usuário {checklistReviewDTO.IdUser} não existe!");
+                    return responseDTO;
+                }
+
+                if (user.Ambulance == null)
                 {
                     responseDTO.SetBadInput($"A ambulância {checklistReviewDTO.IdAmbulance} não existe!");
                     return responseDTO;
@@ -70,19 +76,12 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var user = await _userManager.FindByIdAsync(checklistReviewDTO.IdUser.ToString());
-                if (user == null)
-                {
-                    responseDTO.SetBadInput($"O usuário {checklistReviewDTO.IdUser} não existe!");
-                    return responseDTO;
-                }
-
                 var checklistReview = new ChecklistReview
                 {
                     Type = checklistReviewDTO.Type,
                     Observation = checklistReviewDTO.Observation,
                     Checklist = checklist,
-                    Ambulance = ambulance,
+                    Ambulance = user.Ambulance,
                     User = user,
                 };
                 checklistReview.SetCreatedAt();
@@ -171,7 +170,6 @@ namespace ItsCheck.Service
 
                 checklistReview.Observation = checklistReviewDTO.Observation;
                 checklistReview.Checklist = checklist;
-                checklistReview.Ambulance = ambulance;
 
                 checklistReview.ChecklistReplacedItems?.RemoveAll(_ => true);
 

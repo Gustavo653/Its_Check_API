@@ -8,13 +8,12 @@ namespace ItsCheck.DTO
         [Required]
         public ReviewType Type { get; set; }
         public string? Observation { get; set; }
-        [Required]
-        public int IdAmbulance { get; set; }
+        public int? IdAmbulance { get; set; }
         [Required]
         public int IdChecklist { get; set; }
         [Required]
         public virtual required IList<CategoryReviewDTO> Categories { get; set; }
-        public int IdUser { get; set; }
+        public int? IdUser { get; set; }
     }
 
     public class CategoryReviewDTO
