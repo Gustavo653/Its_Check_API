@@ -87,6 +87,8 @@ namespace ItsCheck.Service
 
                 await ProcessChecklistReviewItems(checklistReviewDTO, checklistReview);
 
+                var teste = _checklistReviewRepository.GetChanges();
+
                 await _checklistReviewRepository.SaveChangesAsync();
                 responseDTO.Object = checklistReviewDTO;
             }
@@ -104,23 +106,24 @@ namespace ItsCheck.Service
             {
                 var category = await _categoryRepository.GetTrackedEntities()
                                                         .FirstOrDefaultAsync(x => x.Id == categoryReviewDTO.Id);
+                var teste = _checklistReviewRepository.GetChanges();
                 if (category == null) continue;
                 foreach (var itemReviewDTO in categoryReviewDTO.Items)
                 {
-                    var item = await _checklistItemRepository.GetTrackedEntities()
+                    var checklistItem = await _checklistItemRepository.GetTrackedEntities()
                                                              .Include(x => x.ChecklistReplacedItems)
                                                              .Include(x => x.Item)
-                                                             .FirstOrDefaultAsync(x => x.Item.Id == itemReviewDTO.Id);
-                    if (item == null) continue;
+                                                             .FirstOrDefaultAsync(x => x.Item.Id == itemReviewDTO.Id && x.Category.Id == category.Id);
+                    if (checklistItem == null) continue;
 
                     var checklistReplacedItem = new ChecklistReplacedItem()
                     {
-                        ChecklistItem = item,
+                        ChecklistItem = checklistItem,
                         ChecklistReview = checklistReview,
                         AmountReplaced = itemReviewDTO.AmountReplaced
                     };
                     checklistReplacedItem.SetCreatedAt();
-                    item.ChecklistReplacedItems?.Add(checklistReplacedItem);
+                    checklistItem.ChecklistReplacedItems?.Add(checklistReplacedItem);
                 }
             }
         }
