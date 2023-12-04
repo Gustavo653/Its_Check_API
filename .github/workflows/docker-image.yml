@@ -25,4 +25,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub
-        run: docker push gustavo1rx7/its-check:latest
+        run: docker push its-check
