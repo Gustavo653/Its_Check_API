@@ -17,14 +17,14 @@ COPY ["ItsCheck.Service/ItsCheck.Service.csproj", "ItsCheck.Service/"]
 COPY ["ItsCheck.DataAccess/ItsCheck.DataAccess.csproj", "ItsCheck.DataAccess/"]
 COPY ["Common.DataAccess/Common.DataAccess.csproj", "Common.DataAccess/"]
 COPY ["Common.Infrastructure/Common.Infrastructure.csproj", "Common.Infrastructure/"]
-RUN dotnet restore "./ItsCheck.API/./ItsCheck.API.csproj"
+RUN dotnet restore "ItsCheck.API/./ItsCheck.API.csproj"
 COPY . .
 WORKDIR "/src/ItsCheck.API"
-RUN dotnet build "./ItsCheck.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "ItsCheck.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ItsCheck.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "ItsCheck.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
