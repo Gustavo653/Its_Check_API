@@ -17,7 +17,7 @@ COPY ["ItsCheck.Service/ItsCheck.Service.csproj", "ItsCheck.Service/"]
 COPY ["ItsCheck.DataAccess/ItsCheck.DataAccess.csproj", "ItsCheck.DataAccess/"]
 COPY ["Common.DataAccess/Common.DataAccess.csproj", "Common.DataAccess/"]
 COPY ["Common.Infrastructure/Common.Infrastructure.csproj", "Common.Infrastructure/"]
-RUN dotnet restore "ItsCheck.API/./ItsCheck.API.csproj"
+RUN dotnet restore "ItsCheck.API/ItsCheck.API.csproj"
 COPY . .
 WORKDIR "/src/ItsCheck.API"
 RUN dotnet build "ItsCheck.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
