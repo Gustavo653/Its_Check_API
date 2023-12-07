@@ -7,9 +7,11 @@ using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Infrastructure.Service;
 using ItsCheck.Persistence;
 using ItsCheck.Service;
+using ItsCheck.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -72,14 +74,6 @@ namespace ItsCheck.API
 
             builder.Services.AddScoped<RoleManager<Role>>();
             builder.Services.AddScoped<UserManager<User>>();
-
-            using (var serviceProvider = builder.Services.BuildServiceProvider())
-            {
-                var dbContext = serviceProvider.GetService<ItsCheckContext>();
-                dbContext.Database.Migrate();
-                SeedRoles(serviceProvider).Wait();
-                SeedAdminUser(serviceProvider).Wait();
-            }
 
             builder.Services.AddIdentityCore<User>(options =>
             {
@@ -161,12 +155,12 @@ namespace ItsCheck.API
 
             builder.Services.AddCors();
 
-            //builder.Services.AddHangfire(x =>
-            //{
-            //    x.UsePostgreSqlStorage(databaseItsCheck);
-            //});
+            builder.Services.AddHangfire(x =>
+            {
+                x.UsePostgreSqlStorage(databaseItsCheck);
+            });
 
-            //builder.Services.AddHangfireServer(x => x.WorkerCount = 1);
+            builder.Services.AddHangfireServer(x => x.WorkerCount = 1);
 
             builder.Services.AddMvc();
             builder.Services.AddRouting();
@@ -175,12 +169,20 @@ namespace ItsCheck.API
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ItsCheckContext>();
+                db.Database.Migrate();
+                SeedRoles(scope.ServiceProvider).Wait();
+                SeedAdminUser(scope.ServiceProvider).Wait();
+            }
+
             app.UseHttpLogging();
 
-            //app.UseHangfireDashboard("/hangfire", new DashboardOptions
-            //{
-            //    Authorization = new[] { new HangfireAuthorizationFilter() },
-            //});
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new HangfireAuthorizationFilter() },
+            });
 
             app.UseCors(builder =>
             {
