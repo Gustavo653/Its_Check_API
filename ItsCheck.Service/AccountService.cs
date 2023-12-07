@@ -1,10 +1,10 @@
-using Common.DTO;
-using Common.Functions;
-using ItsCheck.DataAccess.Interface;
 using ItsCheck.Domain.Enum;
 using ItsCheck.Domain.Identity;
 using ItsCheck.DTO;
-using ItsCheck.Service.Interface;
+using ItsCheck.DTO.Base;
+using ItsCheck.Infrastructure.Repository;
+using ItsCheck.Infrastructure.Service;
+using ItsCheck.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

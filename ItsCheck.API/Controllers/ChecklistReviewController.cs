@@ -1,7 +1,7 @@
-using Common.Functions;
 using ItsCheck.Domain.Enum;
 using ItsCheck.DTO;
-using ItsCheck.Service.Interface;
+using ItsCheck.Infrastructure.Service;
+using ItsCheck.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +19,7 @@ namespace ItsCheck.API.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreateChecklistReview([FromBody] ChecklistReviewDTO checklistReviewDTO)
         {
-            checklistReviewDTO.IdUser = Convert.ToInt32(User.GetUserId());
+            checklistReviewDTO.IdUser = Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User));
             var checklistReview = await _checklistReviewService.Create(checklistReviewDTO);
             return StatusCode(checklistReview.Code, checklistReview);
         }
@@ -28,7 +28,7 @@ namespace ItsCheck.API.Controllers
         [Authorize(Roles = nameof(RoleName.Admin))]
         public async Task<IActionResult> UpdateChecklistReview([FromRoute] int id, [FromBody] ChecklistReviewDTO checklistReviewDTO)
         {
-            checklistReviewDTO.IdUser = Convert.ToInt32(User.GetUserId());
+            checklistReviewDTO.IdUser = Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User));
             var checklistReview = await _checklistReviewService.Update(id, checklistReviewDTO);
             return StatusCode(checklistReview.Code, checklistReview);
         }

@@ -1,7 +1,7 @@
-using Common.Functions;
 using ItsCheck.Domain.Enum;
 using ItsCheck.DTO;
-using ItsCheck.Service.Interface;
+using ItsCheck.Infrastructure.Service;
+using ItsCheck.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -57,7 +57,7 @@ namespace ItsCheck.API.Controllers
         [HttpGet("ByUserAmbulance")]
         public async Task<IActionResult> GetByAmbulanceId()
         {
-            var checklist = await _checklistService.GetByAmbulanceId(Convert.ToInt32(User.GetUserId()));
+            var checklist = await _checklistService.GetByAmbulanceId(Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User)));
             return StatusCode(checklist.Code, checklist);
         }
     }

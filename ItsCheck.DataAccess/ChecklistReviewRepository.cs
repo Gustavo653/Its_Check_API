@@ -1,6 +1,5 @@
-﻿using Common.DataAccess;
-using ItsCheck.DataAccess.Interface;
-using ItsCheck.Domain;
+﻿using ItsCheck.Domain;
+using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Persistence;
 
 namespace ItsCheck.DataAccess

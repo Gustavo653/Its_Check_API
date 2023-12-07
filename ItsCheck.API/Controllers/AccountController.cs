@@ -1,7 +1,7 @@
-using Common.Functions;
 using ItsCheck.Domain.Enum;
 using ItsCheck.DTO;
-using ItsCheck.Service.Interface;
+using ItsCheck.Infrastructure.Service;
+using ItsCheck.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +19,7 @@ namespace ItsCheck.API.Controllers
         [HttpGet("Current")]
         public async Task<IActionResult> GetUser()
         {
-            var user = await _accountService.GetCurrent(User.GetEmail());
+            var user = await _accountService.GetCurrent(ClaimsPrincipalExtensions.GetEmail(User));
             return StatusCode(user.Code, user);
         }
 

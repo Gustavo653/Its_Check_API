@@ -1,9 +1,9 @@
-using Common.DTO;
-using ItsCheck.DataAccess.Interface;
 using ItsCheck.Domain;
 using ItsCheck.Domain.Identity;
 using ItsCheck.DTO;
-using ItsCheck.Service.Interface;
+using ItsCheck.DTO.Base;
+using ItsCheck.Infrastructure.Repository;
+using ItsCheck.Infrastructure.Service;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

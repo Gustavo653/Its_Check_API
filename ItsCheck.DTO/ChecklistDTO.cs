@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ItsCheck.DTO.Base;
 
 namespace ItsCheck.DTO
 {

@@ -1,6 +1,6 @@
 using ItsCheck.Domain.Enum;
 using ItsCheck.DTO;
-using ItsCheck.Service.Interface;
+using ItsCheck.Infrastructure.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,6 +1,6 @@
 using AutoMapper;
 using ItsCheck.Domain.Identity;
-using ItsCheck.Service.Interface;
+using ItsCheck.Infrastructure.Service;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

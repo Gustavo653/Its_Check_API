@@ -1,13 +1,12 @@
-using Common.Functions;
 using Hangfire;
 using Hangfire.PostgreSql;
 using ItsCheck.DataAccess;
-using ItsCheck.DataAccess.Interface;
 using ItsCheck.Domain.Enum;
 using ItsCheck.Domain.Identity;
+using ItsCheck.Infrastructure.Repository;
+using ItsCheck.Infrastructure.Service;
 using ItsCheck.Persistence;
 using ItsCheck.Service;
-using ItsCheck.Service.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

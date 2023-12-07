@@ -36,8 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common.DTO\Common.DTO.csproj" />
-    <ProjectReference Include="..\Common.Functions\Common.Functions.csproj" />
     <ProjectReference Include="..\ItsCheck.DTO\ItsCheck.DTO.csproj" />
     <ProjectReference Include="..\ItsCheck.Persistence\ItsCheck.Persistence.csproj" />
     <ProjectReference Include="..\ItsCheck.Service\ItsCheck.Service.csproj" />

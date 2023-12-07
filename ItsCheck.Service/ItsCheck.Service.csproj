@@ -16,11 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common.DTO\Common.DTO.csproj" />
-    <ProjectReference Include="..\Common.Functions\Common.Functions.csproj" />
     <ProjectReference Include="..\ItsCheck.DataAccess\ItsCheck.DataAccess.csproj" />
     <ProjectReference Include="..\ItsCheck.Domain\ItsCheck.Domain.csproj" />
     <ProjectReference Include="..\ItsCheck.DTO\ItsCheck.DTO.csproj" />
+    <ProjectReference Include="..\ItsCheck.Utils\ItsCheck.Utils.csproj" />
   </ItemGroup>
 
 </Project>
