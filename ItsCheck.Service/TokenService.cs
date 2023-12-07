@@ -1,7 +1,5 @@
-using AutoMapper;
 using ItsCheck.Domain.Identity;
 using ItsCheck.Infrastructure.Service;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,17 +12,11 @@ namespace ItsCheck.Service
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
-        private readonly UserManager<User> _userManager;
-        private readonly IMapper _mapper;
         public readonly SymmetricSecurityKey _key;
 
-        public TokenService(IConfiguration config,
-                            UserManager<User> userManager,
-                            IMapper mapper)
+        public TokenService(IConfiguration config)
         {
             _config = config;
-            _userManager = userManager;
-            _mapper = mapper;
             _key = GetSecurityKey(config["TokenKey"]!);
         }
 
@@ -48,9 +40,9 @@ namespace ItsCheck.Service
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email!),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Name, user.Name),
+                new(ClaimTypes.Email, user.Email!),
             };
 
             claims.AddRange(user.UserRoles.Select(role => new Claim(ClaimTypes.Role, role.Role.Name!)));
@@ -60,7 +52,8 @@ namespace ItsCheck.Service
             var tokenDescription = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTime.Now.AddHours(1),
+                NotBefore = DateTime.Now,
                 SigningCredentials = creds
             };
 
@@ -68,7 +61,7 @@ namespace ItsCheck.Service
 
             var token = tokenHandler.CreateToken(tokenDescription);
 
-            return tokenHandler.WriteToken(token);
+            return await Task.FromResult(tokenHandler.WriteToken(token));
         }
     }
 }

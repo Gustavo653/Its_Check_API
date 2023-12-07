@@ -49,64 +49,12 @@ namespace ItsCheck.API
                 x.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
             });
 
-            builder.Services.AddIdentity<User, Role>()
-                            .AddEntityFrameworkStores<ItsCheckContext>()
-                            .AddDefaultTokenProviders();
+            InjectUserDependencies(builder);
 
-            builder.Services.AddScoped<ITokenService, TokenService>();
-            builder.Services.AddScoped<IAccountService, AccountService>();
-            builder.Services.AddScoped<ICategoryService, CategoryService>();
-            builder.Services.AddScoped<IItemService, ItemService>();
-            builder.Services.AddScoped<IChecklistService, ChecklistService>();
-            builder.Services.AddScoped<IAmbulanceService, AmbulanceService>();
-            builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
-            builder.Services.AddScoped<IChecklistReviewService, ChecklistReviewService>();
-            builder.Services.AddScoped<IChecklistReplacedItemRepository, ChecklistReplacedItemRepository>();
+            InjectServiceDependencies(builder);
+            InjectRepositoryDependencies(builder);
 
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-            builder.Services.AddScoped<IItemRepository, ItemRepository>();
-            builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
-            builder.Services.AddScoped<IAmbulanceRepository, AmbulanceRepository>();
-            builder.Services.AddScoped<IChecklistItemRepository, ChecklistItemRepository>();
-            builder.Services.AddScoped<IChecklistReviewRepository, ChecklistReviewRepository>();
-            builder.Services.AddScoped<IChecklistReplacedItemService, ChecklistReplacedItemService>();
-
-            builder.Services.AddScoped<RoleManager<Role>>();
-            builder.Services.AddScoped<UserManager<User>>();
-
-            builder.Services.AddIdentityCore<User>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 4;
-                options.User.RequireUniqueEmail = true;
-            })
-            .AddRoles<Role>()
-            .AddRoleManager<RoleManager<Role>>()
-            .AddSignInManager<SignInManager<User>>()
-            .AddRoleValidator<RoleValidator<Role>>()
-            .AddEntityFrameworkStores<ItsCheckContext>()
-            .AddDefaultTokenProviders();
-
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("TokenKey")!)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
+            SetupAuthentication(builder, configuration);
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -120,44 +68,13 @@ namespace ItsCheck.API
 
             builder.Services.AddEndpointsApiExplorer();
 
-            builder.Services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "ItsCheck.API", Version = "v1" });
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = @"JWT Authorization header usando Bearer.
-                                Entre com 'Bearer ' [espaço] então coloque seu token.
-                                Exemplo: 'Bearer 12345abcdef'",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
-                });
-
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header
-                        },
-                        new List<string>()
-                    }
-                });
-            });
+            SetupSwaggerGen(builder);
 
             builder.Services.AddCors();
 
             builder.Services.AddHangfire(x =>
             {
-                x.UsePostgreSqlStorage(databaseItsCheck);
+                x.UsePostgreSqlStorage(x => x.UseNpgsqlConnection(databaseItsCheck));
             });
 
             builder.Services.AddHangfireServer(x => x.WorkerCount = 1);
@@ -202,6 +119,114 @@ namespace ItsCheck.API
             app.MapHealthChecks("/health");
 
             app.Run();
+        }
+
+        private static void SetupAuthentication(WebApplicationBuilder builder, ConfigurationManager configuration)
+        {
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("TokenKey")!)),
+                    ValidateLifetime = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+        }
+
+        private static void SetupSwaggerGen(WebApplicationBuilder builder)
+        {
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "ItsCheck.API", Version = "v1" });
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = @"JWT Authorization header usando Bearer.
+                                Entre com 'Bearer ' [espaço] então coloque seu token.
+                                Exemplo: 'Bearer 12345abcdef'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>()
+                    }
+                });
+            });
+        }
+
+        private static void InjectUserDependencies(WebApplicationBuilder builder)
+        {
+            builder.Services.AddIdentity<User, Role>()
+                            .AddEntityFrameworkStores<ItsCheckContext>()
+                            .AddDefaultTokenProviders();
+
+            builder.Services.AddScoped<RoleManager<Role>>();
+            builder.Services.AddScoped<UserManager<User>>();
+
+            builder.Services.AddIdentityCore<User>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 4;
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddRoles<Role>()
+            .AddRoleManager<RoleManager<Role>>()
+            .AddSignInManager<SignInManager<User>>()
+            .AddRoleValidator<RoleValidator<Role>>()
+            .AddEntityFrameworkStores<ItsCheckContext>()
+            .AddDefaultTokenProviders();
+        }
+
+        private static void InjectRepositoryDependencies(WebApplicationBuilder builder)
+        {
+            builder.Services.AddScoped<IChecklistReplacedItemRepository, ChecklistReplacedItemRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<IItemRepository, ItemRepository>();
+            builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
+            builder.Services.AddScoped<IAmbulanceRepository, AmbulanceRepository>();
+            builder.Services.AddScoped<IChecklistItemRepository, ChecklistItemRepository>();
+            builder.Services.AddScoped<IChecklistReviewRepository, ChecklistReviewRepository>();
+        }
+
+        private static void InjectServiceDependencies(WebApplicationBuilder builder)
+        {
+            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IItemService, ItemService>();
+            builder.Services.AddScoped<IChecklistService, ChecklistService>();
+            builder.Services.AddScoped<IAmbulanceService, AmbulanceService>();
+            builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
+            builder.Services.AddScoped<IChecklistReviewService, ChecklistReviewService>();
+            builder.Services.AddScoped<IChecklistReplacedItemService, ChecklistReplacedItemService>();
         }
 
         private static async Task SeedRoles(IServiceProvider serviceProvider)
