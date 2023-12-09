@@ -57,7 +57,7 @@ namespace ItsCheck.API.Controllers
         [HttpGet("ByUserAmbulance")]
         public async Task<IActionResult> GetByAmbulanceId()
         {
-            var checklist = await _checklistService.GetByAmbulanceId(Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User)));
+            var checklist = await _checklistService.GetByAmbulanceId();
             return StatusCode(checklist.Code, checklist);
         }
     }

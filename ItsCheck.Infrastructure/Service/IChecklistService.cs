@@ -9,6 +9,6 @@ namespace ItsCheck.Infrastructure.Service
         Task<ResponseDTO> Create(ChecklistDTO checklistDTO);
         Task<ResponseDTO> Update(int id, ChecklistDTO checklistDTO);
         Task<ResponseDTO> GetById(int id);
-        Task<ResponseDTO> GetByAmbulanceId(int id);
+        Task<ResponseDTO> GetByAmbulanceId();
     }
 }

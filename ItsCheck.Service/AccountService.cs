@@ -103,12 +103,12 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
-        public async Task<ResponseDTO> GetCurrent(string email)
+        public async Task<ResponseDTO> GetCurrent()
         {
             ResponseDTO responseDTO = new();
             try
             {
-                responseDTO.Object = await GetUserByEmail(email);
+                responseDTO.Object = await GetUserByEmail(_session.GetString(Consts.ClaimEmail));
             }
             catch (Exception ex)
             {
@@ -241,8 +241,6 @@ namespace ItsCheck.Service
 
         public async Task<ResponseDTO> GetUsers()
         {
-            var tes = _session.GetString("tenantId");
-            var tess = _session.GetString("userId");
             ResponseDTO responseDTO = new();
             try
             {

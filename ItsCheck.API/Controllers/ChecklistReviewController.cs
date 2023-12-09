@@ -19,7 +19,7 @@ namespace ItsCheck.API.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreateChecklistReview([FromBody] ChecklistReviewDTO checklistReviewDTO)
         {
-            checklistReviewDTO.IdUser = Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User));
+            checklistReviewDTO.IdUser = Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User))
             var checklistReview = await _checklistReviewService.Create(checklistReviewDTO);
             return StatusCode(checklistReview.Code, checklistReview);
         }
@@ -28,7 +28,7 @@ namespace ItsCheck.API.Controllers
         [Authorize(Roles = nameof(RoleName.Admin))]
         public async Task<IActionResult> UpdateChecklistReview([FromRoute] int id, [FromBody] ChecklistReviewDTO checklistReviewDTO)
         {
-            checklistReviewDTO.IdUser = Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User));
+            checklistReviewDTO.IdUser = Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User))
             var checklistReview = await _checklistReviewService.Update(id, checklistReviewDTO);
             return StatusCode(checklistReview.Code, checklistReview);
         }
@@ -51,7 +51,7 @@ namespace ItsCheck.API.Controllers
         [HttpGet("ExistsInitialChecklistReview")]
         public async Task<IActionResult> ExistsChecklistReview()
         {
-            var checklistReview = await _checklistReviewService.ExistsChecklistReview(Convert.ToInt32(User.GetUserId()));
+            var checklistReview = await _checklistReviewService.ExistsChecklistReview(Convert.ToInt32(User.GetUserId()))
             return StatusCode(checklistReview.Code, checklistReview);
         }
     }

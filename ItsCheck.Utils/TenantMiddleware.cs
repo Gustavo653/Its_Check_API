@@ -1,18 +1,30 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using System.Text;
 
 namespace ItsCheck.Utils
 {
     public class TenantMiddleware : IMiddleware
     {
-        public Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            if (context.User.Claims.Any())
+            if (context.User.Identity?.IsAuthenticated == true)
             {
-                context.Session.Set("userId", Encoding.UTF8.GetBytes(context.User.Claims.FirstOrDefault(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value ?? ""));
-                context.Session.Set("tenantId", Encoding.UTF8.GetBytes(context.User.Claims.FirstOrDefault(x => x.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarygroupsid")?.Value ?? ""));
+                var userId = GetClaimValue(context.User, ClaimTypes.NameIdentifier);
+                var tenantId = GetClaimValue(context.User, ClaimTypes.PrimaryGroupSid);
+                var email = GetClaimValue(context.User, ClaimTypes.Email);
+                context.Session.Set(Consts.ClaimUserId, Encoding.UTF8.GetBytes(userId));
+                context.Session.Set(Consts.ClaimTenantId, Encoding.UTF8.GetBytes(tenantId));
+                context.Session.Set(Consts.ClaimEmail, Encoding.UTF8.GetBytes(email));
             }
-            return next(context);
+
+            await next(context);
+        }
+
+        private static string GetClaimValue(ClaimsPrincipal user, string claimType)
+        {
+            var claim = user.Claims.FirstOrDefault(x => x.Type == claimType);
+            return claim?.Value ?? string.Empty;
         }
     }
 }
