@@ -82,6 +82,8 @@ namespace ItsCheck.Service
                 var jsonData = checklists.Select(checklist => new
                 {
                     id = checklist.Id,
+                    checklist.CreatedAt,
+                    checklist.UpdatedAt,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
                             .Select(item => new
@@ -98,10 +100,12 @@ namespace ItsCheck.Service
                                     }
                                 }
                             })
-                }).GroupBy(checklist => new { checklist.id, checklist.name })
+                }).GroupBy(checklist => new { checklist.id, checklist.name, checklist.CreatedAt, checklist.UpdatedAt })
                     .Select(groupedChecklist => new
                     {
                         groupedChecklist.Key.id,
+                        groupedChecklist.Key.CreatedAt,
+                        groupedChecklist.Key.UpdatedAt,
                         groupedChecklist.Key.name,
                         categories = groupedChecklist
                             .SelectMany(checklist => checklist.categories)
@@ -231,6 +235,8 @@ namespace ItsCheck.Service
                 var jsonData = new
                 {
                     id = checklist.Id,
+                    checklist.CreatedAt,
+                    checklist.UpdatedAt,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
                         .Select(item => new

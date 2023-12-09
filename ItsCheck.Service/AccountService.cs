@@ -5,6 +5,7 @@ using ItsCheck.DTO.Base;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Infrastructure.Service;
 using ItsCheck.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,19 +18,23 @@ namespace ItsCheck.Service
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
         private readonly IAmbulanceRepository _ambulanceRepository;
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public AccountService(UserManager<User> userManager,
-            SignInManager<User> signInManager,
-            IUserRepository userRepository,
-            ITokenService tokenService,
-            IAmbulanceRepository ambulanceRepository)
+                              SignInManager<User> signInManager,
+                              IUserRepository userRepository,
+                              ITokenService tokenService,
+                              IAmbulanceRepository ambulanceRepository,
+                              IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userRepository = userRepository;
             _tokenService = tokenService;
             _ambulanceRepository = ambulanceRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
+
+        private ISession _session => _httpContextAccessor.HttpContext.Session;
 
         private async Task<SignInResult> CheckUserPassword(User user, UserLoginDTO userLoginDTO)
         {
@@ -49,6 +54,7 @@ namespace ItsCheck.Service
             {
                 return await _userRepository.GetEntities()
                     .Include(x => x.Ambulance)
+                    .Include(x => x.Tenant)
                     .Include(x => x.UserRoles).ThenInclude(x => x.Role)
                     .FirstOrDefaultAsync(x => x.NormalizedEmail == email.ToUpper());
             }
@@ -235,6 +241,8 @@ namespace ItsCheck.Service
 
         public async Task<ResponseDTO> GetUsers()
         {
+            var tes = _session.GetString("tenantId");
+            var tess = _session.GetString("userId");
             ResponseDTO responseDTO = new();
             try
             {

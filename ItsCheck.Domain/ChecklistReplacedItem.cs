@@ -1,6 +1,6 @@
 ﻿namespace ItsCheck.Domain
 {
-    public class ChecklistReplacedItem : BaseEntity
+    public class ChecklistReplacedItem : TenantBaseEntity
     {
         public required int AmountReplaced { get; set; }
         public required virtual ChecklistReview ChecklistReview { get; set; }

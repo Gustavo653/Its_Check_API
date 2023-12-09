@@ -3,7 +3,7 @@ using ItsCheck.Domain.Identity;
 
 namespace ItsCheck.Domain
 {
-    public class ChecklistReview : BaseEntity
+    public class ChecklistReview : TenantBaseEntity
     {
         public required ReviewType Type { get; set; }
         public string? Observation { get; set; }

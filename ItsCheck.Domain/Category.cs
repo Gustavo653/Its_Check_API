@@ -1,6 +1,6 @@
 ﻿namespace ItsCheck.Domain
 {
-    public class Category : BaseEntity
+    public class Category : TenantBaseEntity
     {
         public required string Name { get; set; }
     }

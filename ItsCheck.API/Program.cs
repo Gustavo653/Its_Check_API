@@ -49,12 +49,16 @@ namespace ItsCheck.API
                 x.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
             });
 
+            builder.Services.AddScoped<TenantMiddleware>();
+
             InjectUserDependencies(builder);
 
             InjectServiceDependencies(builder);
             InjectRepositoryDependencies(builder);
 
             SetupAuthentication(builder, configuration);
+
+            builder.Services.AddSession();
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -111,8 +115,12 @@ namespace ItsCheck.API
             app.UseSwagger();
             app.UseSwaggerUI();
 
+            app.UseSession();
+
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<TenantMiddleware>();
 
             app.MapControllers();
 
