@@ -170,20 +170,24 @@ namespace ItsCheck.Service
 
         private async Task ProcessChecklistItems(ChecklistDTO checklistDTO, Checklist checklist)
         {
+
             foreach (var categoryDTO in checklistDTO.Categories)
             {
-                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == categoryDTO.Id);
-                if (category == null) continue;
+                var category = await _categoryRepository.GetTrackedEntities()
+                                                        .FirstOrDefaultAsync(x => x.Id == categoryDTO.Id) ??
+                                                        throw new Exception($"A categoria {categoryDTO.Id} não existe");
                 foreach (var itemDTO in categoryDTO.Items)
                 {
-                    var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
-                    if (item == null) continue;
+                    var item = await _itemRepository.GetTrackedEntities()
+                                                    .FirstOrDefaultAsync(x => x.Id == itemDTO.Id) ??
+                                                    throw new Exception($"O item {itemDTO.Id} não existe");
                     var checklistItem = new ChecklistItem()
                     {
                         Category = category,
                         Checklist = checklist,
                         Item = item,
-                        AmountRequired = itemDTO.AmountRequired
+                        AmountRequired = itemDTO.AmountRequired,
+                        TenantId = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId))
                     };
                     checklistItem.SetCreatedAt();
                     checklist.ChecklistItems.Add(checklistItem);
@@ -287,7 +291,7 @@ namespace ItsCheck.Service
                 var user = await _userRepository.GetEntities()
                     .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Category)
                     .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Item)
-                        .FirstOrDefaultAsync(x => x.Id == _session.GetInt32(Consts.ClaimUserId));
+                        .FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
 
                 if (user == null || user.Ambulance == null || user.Ambulance.Checklist == null)
                 {

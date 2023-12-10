@@ -1,12 +1,13 @@
 ﻿using ItsCheck.Domain;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Persistence;
+using Microsoft.AspNetCore.Http;
 
 namespace ItsCheck.DataAccess
 {
-    public class ChecklistReviewRepository : BaseRepository<ChecklistReview, ItsCheckContext>, IChecklistReviewRepository
+    public class ChecklistReviewRepository : TenantBaseRepository<ChecklistReview, ItsCheckContext>, IChecklistReviewRepository
     {
-        public ChecklistReviewRepository(ItsCheckContext context) : base(context)
+        public ChecklistReviewRepository(IHttpContextAccessor httpContextAccessor, ItsCheckContext context) : base(httpContextAccessor, context)
         {
         }
     }

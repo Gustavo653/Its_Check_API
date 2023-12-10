@@ -1,3 +1,4 @@
+using ItsCheck.Domain;
 using ItsCheck.Domain.Enum;
 using ItsCheck.Domain.Identity;
 using ItsCheck.DTO;
@@ -8,6 +9,7 @@ using ItsCheck.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace ItsCheck.Service
 {
@@ -123,6 +125,19 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
+                if (userDTO.Role == RoleName.Admin)
+                {
+                    var requestUser = await _userManager.FindByIdAsync(_session.GetString(Consts.ClaimUserId));
+                    var requestUserRoleAdmin = await _userManager.IsInRoleAsync(requestUser!, RoleName.Admin.ToString());
+                    if (!requestUserRoleAdmin)
+                    {
+                        responseDTO.Code = 403;
+                        return responseDTO;
+                    }
+                    userDTO.IdAmbulance = null;
+                    userDTO.IdTenant = null;
+                }
+
                 var user = await _userManager.FindByEmailAsync(userDTO.Email);
                 if (user != null)
                 {
@@ -137,10 +152,13 @@ namespace ItsCheck.Service
                 }
 
                 var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
-                if (ambulance == null && userDTO.Role != RoleName.Admin)
+                if (RoleName.Employee == userDTO.Role)
                 {
-                    responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
-                    return responseDTO;
+                    if (ambulance == null)
+                    {
+                        responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
+                        return responseDTO;
+                    }
                 }
 
                 var userEntity = new User
@@ -149,6 +167,7 @@ namespace ItsCheck.Service
                     Ambulance = ambulance,
                     NormalizedEmail = userDTO.Email.ToUpper(),
                     NormalizedUserName = userDTO.Email.ToUpper(),
+                    TenantId = userDTO.IdTenant
                 };
                 userEntity.PasswordHash = _userManager.PasswordHasher.HashPassword(userEntity, userDTO.Password);
 
@@ -174,6 +193,19 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
+                if (userDTO.Role == RoleName.Admin)
+                {
+                    var requestUser = await _userManager.FindByIdAsync(_session.GetString(Consts.ClaimUserId));
+                    var requestUserRoleAdmin = await _userManager.IsInRoleAsync(requestUser!, RoleName.Admin.ToString());
+                    if (!requestUserRoleAdmin)
+                    {
+                        responseDTO.Code = 403;
+                        return responseDTO;
+                    }
+                    userDTO.IdAmbulance = null;
+                    userDTO.IdTenant = null;
+                }
+
                 var userEntity = await _userRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == id);
                 if (userEntity == null)
                 {
@@ -181,15 +213,19 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
-                if (ambulance == null && userDTO.Role != RoleName.Admin)
+                if (RoleName.Employee == userDTO.Role)
                 {
-                    responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
-                    return responseDTO;
+                    var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
+                    if (ambulance == null)
+                    {
+                        responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
+                        return responseDTO;
+                    }
+                    userEntity.Ambulance = ambulance;
                 }
 
                 PropertyCopier<UserDTO, User>.Copy(userDTO, userEntity);
-                userEntity.Ambulance = ambulance;
+                userEntity.TenantId = userDTO.IdTenant;
 
                 if (userDTO.Password != null)
                     userEntity.PasswordHash = _userManager.PasswordHasher.HashPassword(userEntity, userDTO.Password);
@@ -244,15 +280,19 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                responseDTO.Object = await _userManager.Users.Select(x => new
-                {
-                    x.Id,
-                    x.Name,
-                    x.Email,
-                    x.UserName,
-                    x.Ambulance,
-                    roles = string.Join(",", x.UserRoles.Select(ur => ur.Role.NormalizedName))
-                }).ToListAsync();
+                _session.TryGetValue("tenantId", out byte[] tenantId);
+                responseDTO.Object = await _userRepository.GetEntities()
+                                                          .Where(x => Encoding.UTF8.GetString(tenantId) == string.Empty ||
+                                                                      Encoding.UTF8.GetString(tenantId) == x.TenantId.ToString())
+                                                          .Select(x => new
+                                                          {
+                                                              x.Id,
+                                                              x.Name,
+                                                              x.Email,
+                                                              x.UserName,
+                                                              x.Ambulance,
+                                                              roles = string.Join(",", x.UserRoles.Select(ur => ur.Role.NormalizedName))
+                                                          }).ToListAsync();
             }
             catch (Exception ex)
             {

@@ -222,6 +222,7 @@ namespace ItsCheck.API
             builder.Services.AddScoped<IAmbulanceRepository, AmbulanceRepository>();
             builder.Services.AddScoped<IChecklistItemRepository, ChecklistItemRepository>();
             builder.Services.AddScoped<IChecklistReviewRepository, ChecklistReviewRepository>();
+            builder.Services.AddScoped<ITenantRepository, TenantRepository>();
         }
 
         private static void InjectServiceDependencies(WebApplicationBuilder builder)
@@ -235,6 +236,7 @@ namespace ItsCheck.API
             builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
             builder.Services.AddScoped<IChecklistReviewService, ChecklistReviewService>();
             builder.Services.AddScoped<IChecklistReplacedItemService, ChecklistReplacedItemService>();
+            builder.Services.AddScoped<ITenantService, TenantService>();
         }
 
         private static async Task SeedRoles(IServiceProvider serviceProvider)
