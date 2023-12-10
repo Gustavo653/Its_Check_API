@@ -2,12 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   build_and_push:
@@ -15,11 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Set Docker tag
-        id: tag
-        run: echo ::set-output name=tag::${{ github.ref_slug }}
       - name: Build and push Docker image
         run: |
-          docker build . --file Dockerfile --tag gustavo1rx7/its-check:${{ steps.tag.outputs.tag }}
+          docker build . --file Dockerfile --tag gustavo1rx7/its-check:${GITHUB_REF##*/}
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker push gustavo1rx7/its-check:${{ steps.tag.outputs.tag }}
+          docker push gustavo1rx7/its-check:${GITHUB_REF##*/}
