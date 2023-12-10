@@ -1,12 +1,13 @@
 ﻿using ItsCheck.Domain;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Persistence;
+using Microsoft.AspNetCore.Http;
 
 namespace ItsCheck.DataAccess
 {
-    public class CategoryRepository : BaseRepository<Category, ItsCheckContext>, ICategoryRepository
+    public class CategoryRepository : TenantBaseRepository<Category, ItsCheckContext>, ICategoryRepository
     {
-        public CategoryRepository(ItsCheckContext context) : base(context)
+        public CategoryRepository(IHttpContextAccessor httpContextAccessor, ItsCheckContext context) : base(httpContextAccessor, context)
         {
         }
     }

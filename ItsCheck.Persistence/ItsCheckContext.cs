@@ -35,6 +35,8 @@ namespace ItsCheck.Persistence
         private string? GetTenantId()
         {
             _session.TryGetValue("tenantId", out byte[] tenantId);
+            if (tenantId == null)
+                return null;
             return Encoding.UTF8.GetString(tenantId);
         }
 
@@ -60,31 +62,31 @@ namespace ItsCheck.Persistence
             modelBuilder.Entity<Ambulance>(x =>
             {
                 x.HasIndex(nameof(Ambulance.Number), $"{nameof(Ambulance.Checklist)}Id").IsUnique();
-                x.HasQueryFilter(a => a.TenantId.ToString() == GetTenantId());
+                x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Checklist>(x =>
             {
                 x.HasIndex(a => a.Name).IsUnique();
-                x.HasQueryFilter(a => a.TenantId.ToString() == GetTenantId());
+                x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<ChecklistItem>(x =>
             {
                 x.HasIndex($"{nameof(ChecklistItem.Item)}Id", $"{nameof(ChecklistItem.Category)}Id", $"{nameof(ChecklistItem.Checklist)}Id").IsUnique();
-                x.HasQueryFilter(a => a.TenantId.ToString() == GetTenantId());
+                x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Category>(x =>
             {
                 x.HasIndex(a => a.Name).IsUnique();
-                x.HasQueryFilter(a => a.TenantId.ToString() == GetTenantId());
+                x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Item>(x =>
             {
                 x.HasIndex(a => a.Name).IsUnique();
-                x.HasQueryFilter(a => a.TenantId.ToString() == GetTenantId());
+                x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Tenant>(x =>
@@ -94,13 +96,13 @@ namespace ItsCheck.Persistence
 
             modelBuilder.Entity<ChecklistReview>(x =>
             {
-                x.HasQueryFilter(a => a.TenantId.ToString() == GetTenantId());
+                x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<ChecklistReplacedItem>(x =>
             {
                 x.HasIndex($"{nameof(ChecklistReplacedItem.ChecklistItem)}Id", $"{nameof(ChecklistReplacedItem.ChecklistReview)}Id").IsUnique();
-                x.HasQueryFilter(a => a.TenantId.ToString() == GetTenantId());
+                x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
         }
     }

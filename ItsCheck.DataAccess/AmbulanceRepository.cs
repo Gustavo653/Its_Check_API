@@ -1,12 +1,13 @@
 ﻿using ItsCheck.Domain;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Persistence;
+using Microsoft.AspNetCore.Http;
 
 namespace ItsCheck.DataAccess
 {
-    public class AmbulanceRepository : BaseRepository<Ambulance, ItsCheckContext>, IAmbulanceRepository
+    public class AmbulanceRepository : TenantBaseRepository<Ambulance, ItsCheckContext>, IAmbulanceRepository
     {
-        public AmbulanceRepository(ItsCheckContext context) : base(context)
+        public AmbulanceRepository(IHttpContextAccessor httpContextAccessor, ItsCheckContext context) : base(httpContextAccessor, context)
         {
         }
     }
