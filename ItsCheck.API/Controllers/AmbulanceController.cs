@@ -16,7 +16,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> CreateAmbulance([FromBody] AmbulanceDTO ambulanceDTO)
         {
             var ambulance = await _ambulanceService.Create(ambulanceDTO);
@@ -24,7 +24,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> UpdateAmbulance([FromRoute] int id, [FromBody] AmbulanceDTO ambulanceDTO)
         {
             var ambulance = await _ambulanceService.Update(id, ambulanceDTO);
@@ -32,7 +32,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> RemoveAmbulance([FromRoute] int id)
         {
             var ambulance = await _ambulanceService.Remove(id);

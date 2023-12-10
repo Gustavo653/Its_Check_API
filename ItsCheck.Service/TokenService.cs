@@ -42,7 +42,8 @@ namespace ItsCheck.Service
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.Name),
-                new(ClaimTypes.Email, user.Email!),
+                new(ClaimTypes.Email, user.Email ?? ""),
+                new(ClaimTypes.PrimaryGroupSid, user.Tenant?.Id.ToString() ?? ""),
             };
 
             claims.AddRange(user.UserRoles.Select(role => new Claim(ClaimTypes.Role, role.Role.Name!)));

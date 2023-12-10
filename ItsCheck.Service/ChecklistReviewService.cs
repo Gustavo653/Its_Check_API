@@ -4,6 +4,8 @@ using ItsCheck.DTO;
 using ItsCheck.DTO.Base;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Infrastructure.Service;
+using ItsCheck.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,27 +15,25 @@ namespace ItsCheck.Service
     {
         private readonly IChecklistReviewRepository _checklistReviewRepository;
         private readonly IChecklistRepository _checklistRepository;
-        private readonly IAmbulanceRepository _ambulanceRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IChecklistItemRepository _checklistItemRepository;
         private readonly IUserRepository _userRepository;
-        private readonly UserManager<User> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private ISession _session => _httpContextAccessor.HttpContext.Session;
 
         public ChecklistReviewService(IChecklistReviewRepository checklistReviewRepository,
                                       IChecklistRepository checklistRepository,
-                                      IAmbulanceRepository ambulanceRepository,
                                       ICategoryRepository categoryRepository,
                                       IChecklistItemRepository checklistItemRepository,
                                       IUserRepository userRepository,
-                                      UserManager<User> userManager)
+                                      IHttpContextAccessor httpContextAccessor)
         {
             _checklistReviewRepository = checklistReviewRepository;
             _checklistRepository = checklistRepository;
-            _ambulanceRepository = ambulanceRepository;
             _categoryRepository = categoryRepository;
             _checklistItemRepository = checklistItemRepository;
             _userRepository = userRepository;
-            _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ResponseDTO> Create(ChecklistReviewDTO checklistReviewDTO)
@@ -41,6 +41,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
+                checklistReviewDTO.IdUser = Convert.ToInt32(_session.GetString(Consts.ClaimUserId));
                 var checklist = await _checklistRepository.GetTrackedEntities()
                                                           .FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdChecklist);
                 if (checklist == null)
@@ -108,16 +109,15 @@ namespace ItsCheck.Service
             foreach (var categoryReviewDTO in checklistReviewDTO.Categories)
             {
                 var category = await _categoryRepository.GetTrackedEntities()
-                                                        .FirstOrDefaultAsync(x => x.Id == categoryReviewDTO.Id);
-                var teste = _checklistReviewRepository.GetChanges();
-                if (category == null) continue;
+                                                        .FirstOrDefaultAsync(x => x.Id == categoryReviewDTO.Id) ??
+                                                        throw new Exception($"A categoria {categoryReviewDTO.Id} não existe");
                 foreach (var itemReviewDTO in categoryReviewDTO.Items)
                 {
                     var checklistItem = await _checklistItemRepository.GetTrackedEntities()
                                                              .Include(x => x.ChecklistReplacedItems)
                                                              .Include(x => x.Item)
-                                                             .FirstOrDefaultAsync(x => x.Item.Id == itemReviewDTO.Id && x.Category.Id == category.Id);
-                    if (checklistItem == null) continue;
+                                                             .FirstOrDefaultAsync(x => x.Item.Id == itemReviewDTO.Id && x.Category.Id == category.Id) ??
+                                                             throw new Exception($"O item {itemReviewDTO.Id} não existe");
 
                     var checklistReplacedItem = new ChecklistReplacedItem()
                     {
@@ -136,6 +136,7 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
+                checklistReviewDTO.IdUser = Convert.ToInt32(_session.GetString(Consts.ClaimUserId));
                 var checklistReview = await _checklistReviewRepository.GetTrackedEntities()
                                                                       .Include(x => x.ChecklistReplacedItems)
                                                                       .FirstOrDefaultAsync(c => c.Id == id);
@@ -150,21 +151,6 @@ namespace ItsCheck.Service
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistReviewDTO.IdChecklist} não existe!");
-                    return responseDTO;
-                }
-
-                var ambulance = await _ambulanceRepository.GetTrackedEntities()
-                                                          .FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdAmbulance);
-                if (ambulance == null)
-                {
-                    responseDTO.SetBadInput($"A ambulância {checklistReviewDTO.IdAmbulance} não existe!");
-                    return responseDTO;
-                }
-
-                var user = await _userManager.FindByIdAsync(checklistReviewDTO.IdUser.ToString());
-                if (user == null)
-                {
-                    responseDTO.SetBadInput($"O usuário {checklistReviewDTO.IdUser} não existe!");
                     return responseDTO;
                 }
 
@@ -255,12 +241,12 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
-        public async Task<ResponseDTO> ExistsChecklistReview(int userId)
+        public async Task<ResponseDTO> ExistsChecklistReview()
         {
             ResponseDTO responseDTO = new();
             try
             {
-                var user = await _userRepository.GetEntities().Include(x => x.Ambulance).FirstOrDefaultAsync(x => x.Id == userId);
+                var user = await _userRepository.GetEntities().Include(x => x.Ambulance).FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
                 var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
                                              .AnyAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
                                                             x.Ambulance.Id == user.Ambulance.Id &&

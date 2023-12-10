@@ -17,24 +17,23 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("")]
+        [Authorize(Roles = nameof(RoleName.Employee))]
         public async Task<IActionResult> CreateChecklistReview([FromBody] ChecklistReviewDTO checklistReviewDTO)
         {
-            checklistReviewDTO.IdUser = Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User));
             var checklistReview = await _checklistReviewService.Create(checklistReviewDTO);
             return StatusCode(checklistReview.Code, checklistReview);
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> UpdateChecklistReview([FromRoute] int id, [FromBody] ChecklistReviewDTO checklistReviewDTO)
         {
-            checklistReviewDTO.IdUser = Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User));
             var checklistReview = await _checklistReviewService.Update(id, checklistReviewDTO);
             return StatusCode(checklistReview.Code, checklistReview);
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> RemoveChecklistReview([FromRoute] int id)
         {
             var checklistReview = await _checklistReviewService.Remove(id);
@@ -51,7 +50,7 @@ namespace ItsCheck.API.Controllers
         [HttpGet("ExistsInitialChecklistReview")]
         public async Task<IActionResult> ExistsChecklistReview()
         {
-            var checklistReview = await _checklistReviewService.ExistsChecklistReview(Convert.ToInt32(User.GetUserId()));
+            var checklistReview = await _checklistReviewService.ExistsChecklistReview();
             return StatusCode(checklistReview.Code, checklistReview);
         }
     }

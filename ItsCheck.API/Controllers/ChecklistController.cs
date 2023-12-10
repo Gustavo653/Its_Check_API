@@ -17,7 +17,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> CreateChecklist([FromBody] ChecklistDTO checklistDTO)
         {
             var checklist = await _checklistService.Create(checklistDTO);
@@ -25,7 +25,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> UpdateChecklist([FromRoute] int id, [FromBody] ChecklistDTO checklistDTO)
         {
             var checklist = await _checklistService.Update(id, checklistDTO);
@@ -33,7 +33,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> RemoveChecklist([FromRoute] int id)
         {
             var checklist = await _checklistService.Remove(id);
@@ -57,7 +57,7 @@ namespace ItsCheck.API.Controllers
         [HttpGet("ByUserAmbulance")]
         public async Task<IActionResult> GetByAmbulanceId()
         {
-            var checklist = await _checklistService.GetByAmbulanceId(Convert.ToInt32(ClaimsPrincipalExtensions.GetUserId(User)));
+            var checklist = await _checklistService.GetByAmbulanceId();
             return StatusCode(checklist.Code, checklist);
         }
     }

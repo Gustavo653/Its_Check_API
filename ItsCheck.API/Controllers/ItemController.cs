@@ -16,7 +16,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> CreateItem([FromBody] BasicDTO name)
         {
             var item = await _itemService.Create(name);
@@ -24,7 +24,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("Import")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> ImportCSV([FromForm] IFormFile csvFile)
         {
             var importResult = await _itemService.ImportCSV(csvFile);
@@ -32,7 +32,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> UpdateItem([FromRoute] int id, [FromBody] BasicDTO name)
         {
             var item = await _itemService.Update(id, name);
@@ -40,7 +40,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> RemoveItem([FromRoute] int id)
         {
             var item = await _itemService.Remove(id);

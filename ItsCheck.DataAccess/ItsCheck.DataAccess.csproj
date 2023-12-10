@@ -10,6 +10,7 @@
     <ProjectReference Include="..\ItsCheck.Domain\ItsCheck.Domain.csproj" />
     <ProjectReference Include="..\ItsCheck.Infrastructure\ItsCheck.Infrastructure.csproj" />
     <ProjectReference Include="..\ItsCheck.Persistence\ItsCheck.Persistence.csproj" />
+    <ProjectReference Include="..\ItsCheck.Utils\ItsCheck.Utils.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,7 +19,7 @@ namespace ItsCheck.API.Controllers
         [HttpGet("Current")]
         public async Task<IActionResult> GetUser()
         {
-            var user = await _accountService.GetCurrent(ClaimsPrincipalExtensions.GetEmail(User));
+            var user = await _accountService.GetCurrent();
             return StatusCode(user.Code, user);
         }
 
@@ -32,7 +32,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpGet("")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = $"{nameof(RoleName.Admin)}, {nameof(RoleName.Manager)}")]
         public async Task<IActionResult> GetUsers()
         {
             var user = await _accountService.GetUsers();
@@ -40,7 +40,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = $"{nameof(RoleName.Admin)}, {nameof(RoleName.Manager)}")]
         public async Task<IActionResult> CreateUser([FromBody] UserDTO userDTO)
         {
             var user = await _accountService.CreateUser(userDTO);
@@ -48,7 +48,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = $"{nameof(RoleName.Admin)}, {nameof(RoleName.Manager)}")]
         public async Task<IActionResult> UpdateUser([FromRoute] int id, [FromBody] UserDTO userDTO)
         {
             var user = await _accountService.UpdateUser(id, userDTO);

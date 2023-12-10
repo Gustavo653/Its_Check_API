@@ -16,7 +16,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> CreateChecklistItem([FromBody] ChecklistItemDTO checklistItemDTO)
         {
             var checklistItem = await _checklistItemService.Create(checklistItemDTO);
@@ -24,7 +24,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> UpdateChecklistItem([FromRoute] int id, [FromBody] ChecklistItemDTO checklistItemDTO)
         {
             var checklistItem = await _checklistItemService.Update(id, checklistItemDTO);
@@ -32,7 +32,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> RemoveChecklistItem([FromRoute] int id)
         {
             var checklistItem = await _checklistItemService.Remove(id);

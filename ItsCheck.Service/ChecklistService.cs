@@ -3,6 +3,8 @@ using ItsCheck.DTO;
 using ItsCheck.DTO.Base;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Infrastructure.Service;
+using ItsCheck.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace ItsCheck.Service
@@ -14,19 +16,24 @@ namespace ItsCheck.Service
         private readonly IAmbulanceRepository _ambulanceRepository;
         private readonly IItemRepository _itemRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ChecklistService(IChecklistRepository checklistRepository,
                                 ICategoryRepository categoryRepository,
                                 IAmbulanceRepository ambulanceRepository,
                                 IItemRepository itemRepository,
-                                IUserRepository userRepository)
+                                IUserRepository userRepository,
+                                IHttpContextAccessor httpContextAccessor)
         {
             _checklistRepository = checklistRepository;
             _categoryRepository = categoryRepository;
             _ambulanceRepository = ambulanceRepository;
             _itemRepository = itemRepository;
             _userRepository = userRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
+
+        private ISession _session => _httpContextAccessor.HttpContext.Session;
 
         public Task<ResponseDTO> Create(BasicDTO basicDTO)
         {
@@ -82,6 +89,8 @@ namespace ItsCheck.Service
                 var jsonData = checklists.Select(checklist => new
                 {
                     id = checklist.Id,
+                    checklist.CreatedAt,
+                    checklist.UpdatedAt,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
                             .Select(item => new
@@ -98,10 +107,12 @@ namespace ItsCheck.Service
                                     }
                                 }
                             })
-                }).GroupBy(checklist => new { checklist.id, checklist.name })
+                }).GroupBy(checklist => new { checklist.id, checklist.name, checklist.CreatedAt, checklist.UpdatedAt })
                     .Select(groupedChecklist => new
                     {
                         groupedChecklist.Key.id,
+                        groupedChecklist.Key.CreatedAt,
+                        groupedChecklist.Key.UpdatedAt,
                         groupedChecklist.Key.name,
                         categories = groupedChecklist
                             .SelectMany(checklist => checklist.categories)
@@ -159,20 +170,24 @@ namespace ItsCheck.Service
 
         private async Task ProcessChecklistItems(ChecklistDTO checklistDTO, Checklist checklist)
         {
+
             foreach (var categoryDTO in checklistDTO.Categories)
             {
-                var category = await _categoryRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == categoryDTO.Id);
-                if (category == null) continue;
+                var category = await _categoryRepository.GetTrackedEntities()
+                                                        .FirstOrDefaultAsync(x => x.Id == categoryDTO.Id) ??
+                                                        throw new Exception($"A categoria {categoryDTO.Id} não existe");
                 foreach (var itemDTO in categoryDTO.Items)
                 {
-                    var item = await _itemRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == itemDTO.Id);
-                    if (item == null) continue;
+                    var item = await _itemRepository.GetTrackedEntities()
+                                                    .FirstOrDefaultAsync(x => x.Id == itemDTO.Id) ??
+                                                    throw new Exception($"O item {itemDTO.Id} não existe");
                     var checklistItem = new ChecklistItem()
                     {
                         Category = category,
                         Checklist = checklist,
                         Item = item,
-                        AmountRequired = itemDTO.AmountRequired
+                        AmountRequired = itemDTO.AmountRequired,
+                        TenantId = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId))
                     };
                     checklistItem.SetCreatedAt();
                     checklist.ChecklistItems.Add(checklistItem);
@@ -231,6 +246,8 @@ namespace ItsCheck.Service
                 var jsonData = new
                 {
                     id = checklist.Id,
+                    checklist.CreatedAt,
+                    checklist.UpdatedAt,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
                         .Select(item => new
@@ -266,7 +283,7 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
-        public async Task<ResponseDTO> GetByAmbulanceId(int id)
+        public async Task<ResponseDTO> GetByAmbulanceId()
         {
             ResponseDTO responseDTO = new();
             try
@@ -274,7 +291,7 @@ namespace ItsCheck.Service
                 var user = await _userRepository.GetEntities()
                     .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Category)
                     .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Item)
-                        .FirstOrDefaultAsync(x => x.Id == id);
+                        .FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
 
                 if (user == null || user.Ambulance == null || user.Ambulance.Checklist == null)
                 {

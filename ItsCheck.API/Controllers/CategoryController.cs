@@ -16,7 +16,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> CreateCategory([FromBody] BasicDTO name)
         {
             var category = await _categoryService.Create(name);
@@ -24,7 +24,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] BasicDTO name)
         {
             var category = await _categoryService.Update(id, name);
@@ -32,7 +32,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = nameof(RoleName.Admin))]
+        [Authorize(Roles = nameof(RoleName.Manager))]
         public async Task<IActionResult> RemoveCategory([FromRoute] int id)
         {
             var category = await _categoryService.Remove(id);
