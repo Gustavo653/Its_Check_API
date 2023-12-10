@@ -117,7 +117,7 @@ namespace ItsCheck.Service
                                                              .Include(x => x.ChecklistReplacedItems)
                                                              .Include(x => x.Item)
                                                              .FirstOrDefaultAsync(x => x.Item.Id == itemReviewDTO.Id && x.Category.Id == category.Id) ??
-                                                             throw new Exception($"A categoria {categoryReviewDTO.Id} não existe");
+                                                             throw new Exception($"O item {itemReviewDTO.Id} não existe");
 
                     var checklistReplacedItem = new ChecklistReplacedItem()
                     {
