@@ -103,7 +103,7 @@ namespace ItsCheck.Service
                                     {
                                         id = item.Item.Id,
                                         name = item.Item.Name,
-                                        quantity = item.AmountRequired
+                                        amountRequired = item.AmountRequired
                                     }
                                 }
                             })
@@ -260,7 +260,7 @@ namespace ItsCheck.Service
                                 {
                                     id = item.Item.Id,
                                     name = item.Item.Name,
-                                    quantity = item.AmountRequired
+                                    amountRequired = item.AmountRequired
                                 }
                             }
                         })
@@ -314,7 +314,7 @@ namespace ItsCheck.Service
                                 {
                                     id = item.Item.Id,
                                     name = item.Item.Name,
-                                    quantity = item.AmountRequired
+                                    amountRequired = item.AmountRequired
                                 }
                             }
                         })
