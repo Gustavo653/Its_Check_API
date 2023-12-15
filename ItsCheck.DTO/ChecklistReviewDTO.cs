@@ -31,5 +31,6 @@ namespace ItsCheck.DTO
         public required int Id { get; set; }
         [Required]
         public int AmountReplaced { get; set; }
+        public List<ItemReviewDTO>? ChildItems { get; set; }
     }
 }

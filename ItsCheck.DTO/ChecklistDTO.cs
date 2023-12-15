@@ -23,5 +23,6 @@ namespace ItsCheck.DTO
         public required int Id { get; set; }
         [Required]
         public required int AmountRequired { get; set; }
+        public List<ItemDTO>? ChildItems { get; set; }
     }
 }

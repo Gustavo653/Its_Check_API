@@ -8,7 +8,5 @@ namespace ItsCheck.DTO
         public required int Number { get; set; }
         [Required]
         public required string LicensePlate { get; set; }
-        [Required]
-        public required List<int> IdChecklists { get; set; }
     }
 }

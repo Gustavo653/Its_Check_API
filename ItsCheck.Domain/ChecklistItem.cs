@@ -9,6 +9,9 @@
         public required virtual Category Category { get; set; }
         public int ChecklistId { get; set; }
         public required virtual Checklist Checklist { get; set; }
+        public int? ParentChecklistItemId { get; set; }
+        public virtual ChecklistItem? ParentChecklistItem { get; set; }
+        public virtual List<ChecklistItem>? ChildChecklistItems { get; set; }
         public virtual List<ChecklistReplacedItem>? ChecklistReplacedItems { get; set; }
     }
 }

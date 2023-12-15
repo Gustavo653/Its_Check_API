@@ -1,3 +1,4 @@
+using ItsCheck.DataAccess;
 using ItsCheck.Domain;
 using ItsCheck.DTO;
 using ItsCheck.DTO.Base;
@@ -94,6 +95,7 @@ namespace ItsCheck.Service
 
         private async Task ProcessChecklistReviewItems(ChecklistReviewDTO checklistReviewDTO, ChecklistReview checklistReview)
         {
+            //TODO: Implementar lógica de full e partial
             foreach (var categoryReviewDTO in checklistReviewDTO.Categories)
             {
                 var category = await _categoryRepository.GetTrackedEntities()
@@ -111,10 +113,32 @@ namespace ItsCheck.Service
                     {
                         ChecklistItem = checklistItem,
                         ChecklistReview = checklistReview,
-                        AmountReplaced = itemReviewDTO.AmountReplaced
+                        AmountReplaced = itemReviewDTO.AmountReplaced,
+                        TenantId = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId))
                     };
                     checklistReplacedItem.SetCreatedAt();
                     checklistItem.ChecklistReplacedItems?.Add(checklistReplacedItem);
+
+                    if (itemReviewDTO.ChildItems != null && itemReviewDTO.ChildItems.Count != 0)
+                    {
+                        foreach (var subItemReviewDTO in itemReviewDTO.ChildItems)
+                        {
+                            var subChecklistItem = await _checklistItemRepository.GetTrackedEntities()
+                                         .Include(x => x.ChecklistReplacedItems)
+                                         .Include(x => x.Item)
+                                         .FirstOrDefaultAsync(x => x.Item.Id == subItemReviewDTO.Id && x.Category.Id == category.Id) ??
+                                         throw new Exception($"O item {subItemReviewDTO.Id} não existe");
+                            var subChecklistReplacedItem = new ChecklistReplacedItem()
+                            {
+                                ChecklistItem = subChecklistItem,
+                                ChecklistReview = checklistReview,
+                                AmountReplaced = subItemReviewDTO.AmountReplaced,
+                                TenantId = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId))
+                            };
+                            subChecklistReplacedItem.SetCreatedAt();
+                            subChecklistItem.ChecklistReplacedItems?.Add(subChecklistReplacedItem);
+                        }
+                    }
                 }
             }
         }
@@ -209,13 +233,25 @@ namespace ItsCheck.Service
                                                                          x.Checklist,
                                                                          ChecklistReviews = x.ChecklistReplacedItems != null &&
                                                                                             x.ChecklistReplacedItems.Count != 0 ?
-                                                                                            x.ChecklistReplacedItems.Select(x => new
-                                                                                            {
-                                                                                                category = x.ChecklistItem.Category.Name,
-                                                                                                item = x.ChecklistItem.Item.Name,
-                                                                                                amountReplaced = x.AmountReplaced,
-                                                                                                amoutRequired = x.ChecklistItem.AmountRequired
-                                                                                            }) : null
+                                                                                            x.ChecklistReplacedItems.Where(x => x.ChecklistItem.ParentChecklistItemId == null)
+                                                                                                                    .Select(x => new
+                                                                                                                    {
+                                                                                                                        category = x.ChecklistItem.Category.Name,
+                                                                                                                        item = x.ChecklistItem.Item.Name,
+                                                                                                                        amountReplaced = x.AmountReplaced,
+                                                                                                                        amoutRequired = x.ChecklistItem.AmountRequired,
+                                                                                                                        childItems = x.ChecklistItem.ChildChecklistItems != null &&
+                                                                                                                                     x.ChecklistItem.ChildChecklistItems.Count != 0 ?
+                                                                                                                                     x.ChecklistItem.ChildChecklistItems.Select(x => new
+                                                                                                                                     {
+                                                                                                                                         category = x.Category.Name,
+                                                                                                                                         item = x.Item.Name,
+                                                                                                                                         amountReplaced = x.ChecklistReplacedItems != null &&
+                                                                                                                                                          x.ChecklistReplacedItems.Count != 0 ?
+                                                                                                                                                          x.ChecklistReplacedItems.FirstOrDefault()!.AmountReplaced : int.MinValue,
+                                                                                                                                         amoutRequired = x.AmountRequired,
+                                                                                                                                     }) : null
+                                                                                                                    }) : null
                                                                      })
                                                                      .OrderByDescending(x => x.Id)
                                                                      .Take(takeLast ?? 1000)

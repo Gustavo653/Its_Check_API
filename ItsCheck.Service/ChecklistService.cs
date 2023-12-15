@@ -60,6 +60,7 @@ namespace ItsCheck.Service
             {
                 var checklists = await _checklistRepository.GetEntities()
                     .Include(x => x.ChecklistItems).ThenInclude(x => x.Item)
+                    .Include(x => x.ChecklistItems).ThenInclude(x => x.ChildChecklistItems).ThenInclude(x => x.Item)
                     .Include(x => x.ChecklistItems).ThenInclude(x => x.Category)
                     .ToListAsync();
 
@@ -70,6 +71,7 @@ namespace ItsCheck.Service
                     checklist.UpdatedAt,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
+                            .Where(x => x.ParentChecklistItemId == null)
                             .Select(item => new
                             {
                                 id = item.Category.Id,
@@ -80,7 +82,13 @@ namespace ItsCheck.Service
                                     {
                                         id = item.Item.Id,
                                         name = item.Item.Name,
-                                        amountRequired = item.AmountRequired
+                                        amountRequired = item.AmountRequired,
+                                        childItems = item.ChildChecklistItems != null && item.ChildChecklistItems.Count != 0 ? item.ChildChecklistItems.Select(x=>new
+                                        {
+                                            id = x.Item.Id,
+                                            name = x.Item.Name,
+                                            amountRequired = x.AmountRequired
+                                        }) : []
                                     }
                                 }
                             })
@@ -127,7 +135,7 @@ namespace ItsCheck.Service
                 var checklist = new Checklist
                 {
                     Name = checklistDTO.Name,
-                    ChecklistItems = new List<ChecklistItem>()
+                    ChecklistItems = []
                 };
 
                 await ProcessChecklistItems(checklistDTO, checklist);
@@ -168,6 +176,27 @@ namespace ItsCheck.Service
                     };
                     checklistItem.SetCreatedAt();
                     checklist.ChecklistItems.Add(checklistItem);
+
+                    if (itemDTO.ChildItems != null && itemDTO.ChildItems.Count != 0)
+                    {
+                        foreach (var subItemDTO in itemDTO.ChildItems)
+                        {
+                            var subItem = await _itemRepository.GetTrackedEntities()
+                                                    .FirstOrDefaultAsync(x => x.Id == subItemDTO.Id) ??
+                                                    throw new Exception($"O item {subItemDTO.Id} não existe");
+                            var subChecklistItem = new ChecklistItem()
+                            {
+                                Category = category,
+                                Checklist = checklist,
+                                Item = subItem,
+                                ParentChecklistItem = checklistItem,
+                                AmountRequired = itemDTO.AmountRequired,
+                                TenantId = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId))
+                            };
+                            subChecklistItem.SetCreatedAt();
+                            checklist.ChecklistItems.Add(subChecklistItem);
+                        }
+                    }
                 }
             }
         }
@@ -227,6 +256,7 @@ namespace ItsCheck.Service
                     checklist.UpdatedAt,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
+                        .Where(x => x.ParentChecklistItemId == null)
                         .Select(item => new
                         {
                             id = item.Category.Id,
@@ -237,7 +267,13 @@ namespace ItsCheck.Service
                                 {
                                     id = item.Item.Id,
                                     name = item.Item.Name,
-                                    amountRequired = item.AmountRequired
+                                    amountRequired = item.AmountRequired,
+                                    childItems = item.ChildChecklistItems != null && item.ChildChecklistItems.Count != 0 ? item.ChildChecklistItems.Select(x=>new
+                                    {
+                                        id = x.Item.Id,
+                                        name = x.Item.Name,
+                                        amountRequired = x.AmountRequired
+                                    }) : []
                                 }
                             }
                         })

@@ -16,7 +16,7 @@ namespace ItsCheck.API.Controllers
         }
 
         [HttpPost("")]
-        [Authorize(Roles = nameof(RoleName.Employee))]
+        [Authorize(Roles = $"{nameof(RoleName.Employee)}, {nameof(RoleName.Manager)}")]
         public async Task<IActionResult> CreateChecklistReview([FromBody] ChecklistReviewDTO checklistReviewDTO)
         {
             var checklistReview = await _checklistReviewService.Create(checklistReviewDTO);

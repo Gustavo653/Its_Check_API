@@ -61,7 +61,7 @@ namespace ItsCheck.Persistence
 
             modelBuilder.Entity<Ambulance>(x =>
             {
-                x.HasIndex(a => new { a.Number, a.TenantId }).IsUnique();
+                x.HasIndex(a => new { a.Number, a.LicensePlate, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
@@ -73,7 +73,7 @@ namespace ItsCheck.Persistence
 
             modelBuilder.Entity<ChecklistItem>(x =>
             {
-                x.HasIndex(a => new { a.ItemId, a.CategoryId, a.ChecklistId, a.TenantId }).IsUnique();
+                x.HasIndex(a => new { a.ItemId, a.CategoryId, a.ChecklistId, a.TenantId, a.ParentChecklistItemId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
@@ -85,7 +85,7 @@ namespace ItsCheck.Persistence
 
             modelBuilder.Entity<Item>(x =>
             {
-                x.HasIndex(a => new { a.Name, a.TenantId, a.ParentItemId }).IsUnique();
+                x.HasIndex(a => new { a.Name, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
