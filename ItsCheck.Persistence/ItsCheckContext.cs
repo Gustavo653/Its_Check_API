@@ -29,6 +29,7 @@ namespace ItsCheck.Persistence
         public DbSet<Checklist> Checklists { get; set; }
         public DbSet<ChecklistItem> ChecklistItems { get; set; }
         public DbSet<Ambulance> Ambulances { get; set; }
+        public DbSet<AmbulanceChecklistXRef> AmbulanceChecklistXRefs { get; set; }
         public DbSet<ChecklistReview> ChecklistReviews { get; set; }
         public DbSet<ChecklistReplacedItem> ChecklistReplacedItems { get; set; }
 
@@ -61,31 +62,40 @@ namespace ItsCheck.Persistence
 
             modelBuilder.Entity<Ambulance>(x =>
             {
-                x.HasIndex(nameof(Ambulance.Number), $"{nameof(Ambulance.Checklist)}Id").IsUnique();
+                x.HasIndex(a => new { a.Number, a.TenantId }).IsUnique();
+                x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
+            });
+
+            modelBuilder.Entity<AmbulanceChecklistXRef>(x =>
+            {
+                x.HasOne(a => a.Ambulance).WithMany(r => r.AmbulanceChecklistXRefs).HasForeignKey(x => x.AmbulanceId).IsRequired();
+                x.HasOne(a => a.Checklist).WithMany(r => r.AmbulanceChecklistXRefs).HasForeignKey(x => x.ChecklistId).IsRequired();
+
+                x.HasIndex($"{nameof(AmbulanceChecklistXRef.ChecklistId)}", $"{nameof(AmbulanceChecklistXRef.AmbulanceId)}", $"{nameof(AmbulanceChecklistXRef.TenantId)}").IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Checklist>(x =>
             {
-                x.HasIndex(a => a.Name).IsUnique();
+                x.HasIndex(a => new { a.Name, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<ChecklistItem>(x =>
             {
-                x.HasIndex($"{nameof(ChecklistItem.Item)}Id", $"{nameof(ChecklistItem.Category)}Id", $"{nameof(ChecklistItem.Checklist)}Id").IsUnique();
+                x.HasIndex($"{nameof(ChecklistItem.ItemId)}", $"{nameof(ChecklistItem.CategoryId)}", $"{nameof(ChecklistItem.ChecklistId)}", $"{nameof(ChecklistItem.TenantId)}").IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Category>(x =>
             {
-                x.HasIndex(a => a.Name).IsUnique();
+                x.HasIndex(a => new { a.Name, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Item>(x =>
             {
-                x.HasIndex(a => a.Name).IsUnique();
+                x.HasIndex(a => new { a.Name, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
@@ -101,7 +111,7 @@ namespace ItsCheck.Persistence
 
             modelBuilder.Entity<ChecklistReplacedItem>(x =>
             {
-                x.HasIndex($"{nameof(ChecklistReplacedItem.ChecklistItem)}Id", $"{nameof(ChecklistReplacedItem.ChecklistReview)}Id").IsUnique();
+                x.HasIndex($"{nameof(ChecklistReplacedItem.ChecklistItemId)}", $"{nameof(ChecklistReplacedItem.ChecklistReviewId)}", $"{nameof(ChecklistReplacedItem.TenantId)}").IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
         }

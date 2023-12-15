@@ -4,7 +4,11 @@ namespace ItsCheck.DTO
 {
     public class AmbulanceDTO
     {
-        [Required] public int Number { get; set; }
-        [Required] public int IdChecklist { get; set; }
+        [Required] 
+        public required int Number { get; set; }
+        [Required]
+        public required string LicensePlate { get; set; }
+        [Required] 
+        public required List<int> IdChecklists { get; set; }
     }
 }

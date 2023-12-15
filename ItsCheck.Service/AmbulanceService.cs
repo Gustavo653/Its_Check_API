@@ -10,11 +10,15 @@ namespace ItsCheck.Service
     public class AmbulanceService : IAmbulanceService
     {
         private readonly IAmbulanceRepository _ambulanceRepository;
+        private readonly IAmbulanceChecklistXRefRepository _ambulanceChecklistXRefRepository;
         private readonly IChecklistRepository _checklistRepository;
 
-        public AmbulanceService(IAmbulanceRepository ambulanceRepository, IChecklistRepository checklistRepository)
+        public AmbulanceService(IAmbulanceRepository ambulanceRepository,
+                                IAmbulanceChecklistXRefRepository ambulanceChecklistXRefRepository,
+                                IChecklistRepository checklistRepository)
         {
             _ambulanceRepository = ambulanceRepository;
+            _ambulanceChecklistXRefRepository = ambulanceChecklistXRefRepository;
             _checklistRepository = checklistRepository;
         }
 
@@ -30,20 +34,27 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ambulanceDTO.IdChecklist);
-                if (checklist == null)
-                {
-                    responseDTO.SetBadInput($"O checklist {ambulanceDTO.IdChecklist} não existe!");
-                    return responseDTO;
-                }
-
                 var ambulance = new Ambulance
                 {
                     Number = ambulanceDTO.Number,
-                    Checklist = checklist,
+                    LicensePlate = ambulanceDTO.LicensePlate,
                 };
                 ambulance.SetCreatedAt();
                 await _ambulanceRepository.InsertAsync(ambulance);
+
+                foreach (var item in ambulanceDTO.IdChecklists)
+                {
+                    var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == item);
+                    if (checklist == null)
+                    {
+                        responseDTO.SetBadInput($"O checklist {item} não existe!");
+                        return responseDTO;
+                    }
+                    var ambulanceChecklistXRef = new AmbulanceChecklistXRef() { Ambulance = ambulance, Checklist = checklist };
+                    ambulanceChecklistXRef.SetCreatedAt();
+                    await _ambulanceChecklistXRefRepository.InsertAsync(ambulanceChecklistXRef);
+                }
+
                 await _ambulanceRepository.SaveChangesAsync();
                 responseDTO.Object = ambulance;
             }
@@ -59,23 +70,30 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
+                var ambulance = await _ambulanceRepository.GetTrackedEntities().Include(x => x.AmbulanceChecklistXRefs).FirstOrDefaultAsync(c => c.Id == id);
                 if (ambulance == null)
                 {
                     responseDTO.SetBadInput($"A ambulância {ambulanceDTO.Number} não existe!");
                     return responseDTO;
                 }
 
-                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == ambulanceDTO.IdChecklist);
-                if (checklist == null)
-                {
-                    responseDTO.SetBadInput($"O checklist {ambulanceDTO.IdChecklist} não existe!");
-                    return responseDTO;
-                }
+                ambulance.AmbulanceChecklistXRefs?.Clear();
 
                 ambulance.Number = ambulanceDTO.Number;
                 ambulance.SetUpdatedAt();
-                ambulance.Checklist = checklist;
+
+                foreach (var item in ambulanceDTO.IdChecklists)
+                {
+                    var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == item);
+                    if (checklist == null)
+                    {
+                        responseDTO.SetBadInput($"O checklist {item} não existe!");
+                        return responseDTO;
+                    }
+                    var ambulanceChecklistXRef = new AmbulanceChecklistXRef() { Ambulance = ambulance, Checklist = checklist };
+                    ambulanceChecklistXRef.SetCreatedAt();
+                    await _ambulanceChecklistXRefRepository.InsertAsync(ambulanceChecklistXRef);
+                }
 
                 await _ambulanceRepository.SaveChangesAsync();
                 responseDTO.Object = ambulance;
@@ -114,7 +132,10 @@ namespace ItsCheck.Service
             ResponseDTO responseDTO = new();
             try
             {
-                responseDTO.Object = await _ambulanceRepository.GetEntities().Include(x => x.Checklist).ToListAsync();
+                responseDTO.Object = await _ambulanceRepository.GetEntities()
+                                                               .Include(x => x.AmbulanceChecklistXRefs)
+                                                               .ThenInclude(x => x.Checklist)
+                                                               .ToListAsync();
             }
             catch (Exception ex)
             {

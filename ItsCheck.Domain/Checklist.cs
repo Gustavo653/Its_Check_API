@@ -4,6 +4,6 @@
     {
         public required string Name { get; set; }
         public virtual List<ChecklistItem> ChecklistItems { get; set; }
-        public virtual List<Ambulance> Ambulances { get; set; }
+        public virtual List<AmbulanceChecklistXRef>? AmbulanceChecklistXRefs { get; set; }
     }
 }

@@ -214,6 +214,7 @@ namespace ItsCheck.API
 
         private static void InjectRepositoryDependencies(WebApplicationBuilder builder)
         {
+            builder.Services.AddScoped<IAmbulanceChecklistXRefRepository, AmbulanceChecklistXRefRepository>();
             builder.Services.AddScoped<IChecklistReplacedItemRepository, ChecklistReplacedItemRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();

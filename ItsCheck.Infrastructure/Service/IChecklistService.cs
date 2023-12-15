@@ -4,10 +4,8 @@ using ItsCheck.Infrastructure.Base;
 
 namespace ItsCheck.Infrastructure.Service
 {
-    public interface IChecklistService : IBaseService<BasicDTO>
+    public interface IChecklistService : IBaseService<ChecklistDTO>
     {
-        Task<ResponseDTO> Create(ChecklistDTO checklistDTO);
-        Task<ResponseDTO> Update(int id, ChecklistDTO checklistDTO);
         Task<ResponseDTO> GetById(int id);
         Task<ResponseDTO> GetByAmbulanceId();
     }
