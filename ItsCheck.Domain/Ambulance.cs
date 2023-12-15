@@ -3,6 +3,6 @@
     public class Ambulance : TenantBaseEntity
     {
         public required int Number { get; set; }
-        public required virtual Checklist Checklist { get; set; }
+        public required string LicensePlate { get; set; }
     }
 }

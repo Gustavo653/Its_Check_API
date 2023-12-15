@@ -1,27 +1,28 @@
-﻿using System.ComponentModel.DataAnnotations;
-using ItsCheck.DTO.Base;
+﻿using ItsCheck.DTO.Base;
+using System.ComponentModel.DataAnnotations;
 
 namespace ItsCheck.DTO
 {
     public class ChecklistDTO : BasicDTO
     {
-        [Required] 
+        [Required]
         public virtual required IEnumerable<CategoryDTO> Categories { get; set; }
     }
 
     public class CategoryDTO
     {
-        [Required] 
+        [Required]
         public required int Id { get; set; }
-        [Required] 
+        [Required]
         public virtual required IEnumerable<ItemDTO> Items { get; set; }
     }
 
     public class ItemDTO
     {
-        [Required] 
+        [Required]
         public required int Id { get; set; }
-        [Required] 
+        [Required]
         public required int AmountRequired { get; set; }
+        public List<ItemDTO>? ChildItems { get; set; }
     }
 }

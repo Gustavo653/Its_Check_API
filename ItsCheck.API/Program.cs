@@ -11,7 +11,6 @@ using ItsCheck.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -233,9 +232,7 @@ namespace ItsCheck.API
             builder.Services.AddScoped<IItemService, ItemService>();
             builder.Services.AddScoped<IChecklistService, ChecklistService>();
             builder.Services.AddScoped<IAmbulanceService, AmbulanceService>();
-            builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
             builder.Services.AddScoped<IChecklistReviewService, ChecklistReviewService>();
-            builder.Services.AddScoped<IChecklistReplacedItemService, ChecklistReplacedItemService>();
             builder.Services.AddScoped<ITenantService, TenantService>();
         }
 

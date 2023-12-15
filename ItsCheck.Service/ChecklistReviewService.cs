@@ -1,12 +1,11 @@
+using ItsCheck.DataAccess;
 using ItsCheck.Domain;
-using ItsCheck.Domain.Identity;
 using ItsCheck.DTO;
 using ItsCheck.DTO.Base;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Infrastructure.Service;
 using ItsCheck.Utils;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ItsCheck.Service
@@ -19,6 +18,7 @@ namespace ItsCheck.Service
         private readonly IChecklistItemRepository _checklistItemRepository;
         private readonly IUserRepository _userRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IAmbulanceRepository _ambulanceRepository;
         private ISession _session => _httpContextAccessor.HttpContext.Session;
 
         public ChecklistReviewService(IChecklistReviewRepository checklistReviewRepository,
@@ -26,7 +26,8 @@ namespace ItsCheck.Service
                                       ICategoryRepository categoryRepository,
                                       IChecklistItemRepository checklistItemRepository,
                                       IUserRepository userRepository,
-                                      IHttpContextAccessor httpContextAccessor)
+                                      IHttpContextAccessor httpContextAccessor,
+                                      IAmbulanceRepository ambulanceRepository)
         {
             _checklistReviewRepository = checklistReviewRepository;
             _checklistRepository = checklistRepository;
@@ -34,6 +35,7 @@ namespace ItsCheck.Service
             _checklistItemRepository = checklistItemRepository;
             _userRepository = userRepository;
             _httpContextAccessor = httpContextAccessor;
+            _ambulanceRepository = ambulanceRepository;
         }
 
         public async Task<ResponseDTO> Create(ChecklistReviewDTO checklistReviewDTO)
@@ -42,38 +44,25 @@ namespace ItsCheck.Service
             try
             {
                 checklistReviewDTO.IdUser = Convert.ToInt32(_session.GetString(Consts.ClaimUserId));
-                var checklist = await _checklistRepository.GetTrackedEntities()
-                                                          .FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdChecklist);
+
+                var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdChecklist);
                 if (checklist == null)
                 {
                     responseDTO.SetBadInput($"O checklist {checklistReviewDTO.IdChecklist} não existe!");
                     return responseDTO;
                 }
 
-                var user = await _userRepository.GetTrackedEntities().Include(x => x.Ambulance).FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdUser);
-
+                var user = await _userRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdUser);
                 if (user == null)
                 {
                     responseDTO.SetBadInput($"O usuário {checklistReviewDTO.IdUser} não existe!");
                     return responseDTO;
                 }
 
-                if (user.Ambulance == null)
+                var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == checklistReviewDTO.IdAmbulance);
+                if (ambulance == null)
                 {
                     responseDTO.SetBadInput($"A ambulância {checklistReviewDTO.IdAmbulance} não existe!");
-                    return responseDTO;
-                }
-
-                var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
-                                                            .FirstOrDefaultAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
-                                                                                      x.Ambulance.Id == checklistReviewDTO.IdAmbulance &&
-                                                                                      x.User.Id == checklistReviewDTO.IdUser &&
-                                                                                      x.Type == Domain.Enum.ReviewType.Initial &&
-                                                                                      checklistReviewDTO.Type == Domain.Enum.ReviewType.Initial);
-
-                if (checklistReviewInitialDuplicated != null)
-                {
-                    responseDTO.SetBadInput($"Um checklist inicial foi criado há pouco tempo ({checklistReviewInitialDuplicated.CreatedAt})!");
                     return responseDTO;
                 }
 
@@ -82,7 +71,7 @@ namespace ItsCheck.Service
                     Type = checklistReviewDTO.Type,
                     Observation = checklistReviewDTO.Observation,
                     Checklist = checklist,
-                    Ambulance = user.Ambulance,
+                    Ambulance = ambulance,
                     User = user,
                 };
                 checklistReview.SetCreatedAt();
@@ -106,6 +95,7 @@ namespace ItsCheck.Service
 
         private async Task ProcessChecklistReviewItems(ChecklistReviewDTO checklistReviewDTO, ChecklistReview checklistReview)
         {
+            //TODO: Implementar lógica de full e partial
             foreach (var categoryReviewDTO in checklistReviewDTO.Categories)
             {
                 var category = await _categoryRepository.GetTrackedEntities()
@@ -123,10 +113,32 @@ namespace ItsCheck.Service
                     {
                         ChecklistItem = checklistItem,
                         ChecklistReview = checklistReview,
-                        AmountReplaced = itemReviewDTO.AmountReplaced
+                        AmountReplaced = itemReviewDTO.AmountReplaced,
+                        TenantId = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId))
                     };
                     checklistReplacedItem.SetCreatedAt();
                     checklistItem.ChecklistReplacedItems?.Add(checklistReplacedItem);
+
+                    if (itemReviewDTO.ChildItems != null && itemReviewDTO.ChildItems.Count != 0)
+                    {
+                        foreach (var subItemReviewDTO in itemReviewDTO.ChildItems)
+                        {
+                            var subChecklistItem = await _checklistItemRepository.GetTrackedEntities()
+                                         .Include(x => x.ChecklistReplacedItems)
+                                         .Include(x => x.Item)
+                                         .FirstOrDefaultAsync(x => x.Item.Id == subItemReviewDTO.Id && x.Category.Id == category.Id) ??
+                                         throw new Exception($"O item {subItemReviewDTO.Id} não existe");
+                            var subChecklistReplacedItem = new ChecklistReplacedItem()
+                            {
+                                ChecklistItem = subChecklistItem,
+                                ChecklistReview = checklistReview,
+                                AmountReplaced = subItemReviewDTO.AmountReplaced,
+                                TenantId = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId))
+                            };
+                            subChecklistReplacedItem.SetCreatedAt();
+                            subChecklistItem.ChecklistReplacedItems?.Add(subChecklistReplacedItem);
+                        }
+                    }
                 }
             }
         }
@@ -220,14 +232,26 @@ namespace ItsCheck.Service
                                                                          User = x.User.Name,
                                                                          x.Checklist,
                                                                          ChecklistReviews = x.ChecklistReplacedItems != null &&
-                                                                                            x.ChecklistReplacedItems.Any() ?
-                                                                                            x.ChecklistReplacedItems.Select(x => new
-                                                                                            {
-                                                                                                category = x.ChecklistItem.Category.Name,
-                                                                                                item = x.ChecklistItem.Item.Name,
-                                                                                                amountReplaced = x.AmountReplaced,
-                                                                                                amoutRequired = x.ChecklistItem.AmountRequired
-                                                                                            }) : null
+                                                                                            x.ChecklistReplacedItems.Count != 0 ?
+                                                                                            x.ChecklistReplacedItems.Where(x => x.ChecklistItem.ParentChecklistItemId == null)
+                                                                                                                    .Select(x => new
+                                                                                                                    {
+                                                                                                                        category = x.ChecklistItem.Category.Name,
+                                                                                                                        item = x.ChecklistItem.Item.Name,
+                                                                                                                        amountReplaced = x.AmountReplaced,
+                                                                                                                        amoutRequired = x.ChecklistItem.AmountRequired,
+                                                                                                                        childItems = x.ChecklistItem.ChildChecklistItems != null &&
+                                                                                                                                     x.ChecklistItem.ChildChecklistItems.Count != 0 ?
+                                                                                                                                     x.ChecklistItem.ChildChecklistItems.Select(x => new
+                                                                                                                                     {
+                                                                                                                                         category = x.Category.Name,
+                                                                                                                                         item = x.Item.Name,
+                                                                                                                                         amountReplaced = x.ChecklistReplacedItems != null &&
+                                                                                                                                                          x.ChecklistReplacedItems.Count != 0 ?
+                                                                                                                                                          x.ChecklistReplacedItems.FirstOrDefault()!.AmountReplaced : int.MinValue,
+                                                                                                                                         amoutRequired = x.AmountRequired,
+                                                                                                                                     }) : null
+                                                                                                                    }) : null
                                                                      })
                                                                      .OrderByDescending(x => x.Id)
                                                                      .Take(takeLast ?? 1000)
@@ -241,26 +265,26 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
-        public async Task<ResponseDTO> ExistsChecklistReview()
+        public Task<ResponseDTO> ExistsChecklistReview()
         {
-            ResponseDTO responseDTO = new();
-            try
-            {
-                var user = await _userRepository.GetEntities().Include(x => x.Ambulance).FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
-                var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
-                                             .AnyAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
-                                                            x.Ambulance.Id == user.Ambulance.Id &&
-                                                            x.User.Id == user.Id &&
-                                                            x.Type == Domain.Enum.ReviewType.Initial);
+            //ResponseDTO responseDTO = new();
+            //try
+            //{
+            //    var user = await _userRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
+            //    var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
+            //                                 .AnyAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
+            //                                                x.User.Id == user!.Id &&
+            //                                                x.Type == Domain.Enum.ReviewType.Initial);
 
-                responseDTO.Object = checklistReviewInitialDuplicated;
-            }
-            catch (Exception ex)
-            {
-                responseDTO.SetError(ex);
-            }
+            //    responseDTO.Object = checklistReviewInitialDuplicated;
+            //}
+            //catch (Exception ex)
+            //{
+            //    responseDTO.SetError(ex);
+            //}
 
-            return responseDTO;
+            //return responseDTO;
+            throw new Exception("Método desativado devido ao MVP");
         }
     }
 }

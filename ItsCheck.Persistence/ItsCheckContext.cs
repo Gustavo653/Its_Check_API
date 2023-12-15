@@ -61,31 +61,31 @@ namespace ItsCheck.Persistence
 
             modelBuilder.Entity<Ambulance>(x =>
             {
-                x.HasIndex(nameof(Ambulance.Number), $"{nameof(Ambulance.Checklist)}Id").IsUnique();
+                x.HasIndex(a => new { a.Number, a.LicensePlate, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Checklist>(x =>
             {
-                x.HasIndex(a => a.Name).IsUnique();
+                x.HasIndex(a => new { a.Name, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<ChecklistItem>(x =>
             {
-                x.HasIndex($"{nameof(ChecklistItem.Item)}Id", $"{nameof(ChecklistItem.Category)}Id", $"{nameof(ChecklistItem.Checklist)}Id").IsUnique();
+                x.HasIndex(a => new { a.ItemId, a.CategoryId, a.ChecklistId, a.TenantId, a.ParentChecklistItemId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Category>(x =>
             {
-                x.HasIndex(a => a.Name).IsUnique();
+                x.HasIndex(a => new { a.Name, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
             modelBuilder.Entity<Item>(x =>
             {
-                x.HasIndex(a => a.Name).IsUnique();
+                x.HasIndex(a => new { a.Name, a.TenantId }).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
 
@@ -101,7 +101,7 @@ namespace ItsCheck.Persistence
 
             modelBuilder.Entity<ChecklistReplacedItem>(x =>
             {
-                x.HasIndex($"{nameof(ChecklistReplacedItem.ChecklistItem)}Id", $"{nameof(ChecklistReplacedItem.ChecklistReview)}Id").IsUnique();
+                x.HasIndex(a => new {a.ChecklistItemId, a.ChecklistReviewId, a.TenantId}).IsUnique();
                 x.HasQueryFilter(a => a.TenantId.ToString() == (GetTenantId() ?? a.TenantId.ToString()));
             });
         }

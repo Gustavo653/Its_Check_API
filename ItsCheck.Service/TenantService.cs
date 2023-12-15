@@ -1,5 +1,4 @@
 using ItsCheck.Domain;
-using ItsCheck.DTO;
 using ItsCheck.DTO.Base;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Infrastructure.Service;

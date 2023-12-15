@@ -1,4 +1,3 @@
-using ItsCheck.Domain;
 using ItsCheck.Domain.Enum;
 using ItsCheck.Domain.Identity;
 using ItsCheck.DTO;
@@ -55,7 +54,6 @@ namespace ItsCheck.Service
             try
             {
                 return await _userRepository.GetEntities()
-                    .Include(x => x.Ambulance)
                     .Include(x => x.Tenant)
                     .Include(x => x.UserRoles).ThenInclude(x => x.Role)
                     .FirstOrDefaultAsync(x => x.NormalizedEmail == email.ToUpper());
@@ -93,7 +91,6 @@ namespace ItsCheck.Service
                     role = user.UserRoles?.FirstOrDefault()?.Role.Name,
                     name = user.Name,
                     email = user.Email,
-                    ambulance = user.Ambulance,
                     token = await _tokenService.CreateToken(user)
                 };
             }
@@ -134,8 +131,12 @@ namespace ItsCheck.Service
                         responseDTO.Code = 403;
                         return responseDTO;
                     }
-                    userDTO.IdAmbulance = null;
                     userDTO.IdTenant = null;
+                    userDTO.Coren = null;
+                }
+                else
+                {
+                    userDTO.IdTenant = Convert.ToInt32(_session.GetInt32(Consts.ClaimTenantId) ?? userDTO.IdTenant);
                 }
 
                 var user = await _userManager.FindByEmailAsync(userDTO.Email);
@@ -151,24 +152,15 @@ namespace ItsCheck.Service
                     return responseDTO;
                 }
 
-                var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
-                if (RoleName.Employee == userDTO.Role)
-                {
-                    if (ambulance == null)
-                    {
-                        responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
-                        return responseDTO;
-                    }
-                }
-
                 var userEntity = new User
                 {
                     Name = userDTO.Name,
-                    Ambulance = ambulance,
+                    Coren = userDTO.Role == RoleName.Employee ? userDTO.Coren : null,
                     NormalizedEmail = userDTO.Email.ToUpper(),
                     NormalizedUserName = userDTO.Email.ToUpper(),
                     TenantId = userDTO.IdTenant
                 };
+
                 userEntity.PasswordHash = _userManager.PasswordHasher.HashPassword(userEntity, userDTO.Password);
 
                 PropertyCopier<UserDTO, User>.Copy(userDTO, userEntity);
@@ -202,8 +194,12 @@ namespace ItsCheck.Service
                         responseDTO.Code = 403;
                         return responseDTO;
                     }
-                    userDTO.IdAmbulance = null;
                     userDTO.IdTenant = null;
+                    userDTO.Coren = null;
+                }
+                else
+                {
+                    userDTO.IdTenant = Convert.ToInt32(_session.GetInt32(Consts.ClaimTenantId) ?? userDTO.IdTenant);
                 }
 
                 var userEntity = await _userRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == id);
@@ -211,17 +207,6 @@ namespace ItsCheck.Service
                 {
                     responseDTO.SetBadInput($"Usuário não encotrado com este id: {id}!");
                     return responseDTO;
-                }
-
-                if (RoleName.Employee == userDTO.Role)
-                {
-                    var ambulance = await _ambulanceRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == userDTO.IdAmbulance);
-                    if (ambulance == null)
-                    {
-                        responseDTO.SetBadInput($"A ambulância {userDTO.IdAmbulance} não existe!");
-                        return responseDTO;
-                    }
-                    userEntity.Ambulance = ambulance;
                 }
 
                 PropertyCopier<UserDTO, User>.Copy(userDTO, userEntity);
@@ -290,7 +275,7 @@ namespace ItsCheck.Service
                                                               x.Name,
                                                               x.Email,
                                                               x.UserName,
-                                                              x.Ambulance,
+                                                              x.Coren,
                                                               roles = string.Join(",", x.UserRoles.Select(ur => ur.Role.NormalizedName))
                                                           }).ToListAsync();
             }

@@ -13,50 +13,27 @@ namespace ItsCheck.Service
     {
         private readonly IChecklistRepository _checklistRepository;
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IAmbulanceRepository _ambulanceRepository;
         private readonly IItemRepository _itemRepository;
-        private readonly IUserRepository _userRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ChecklistService(IChecklistRepository checklistRepository,
                                 ICategoryRepository categoryRepository,
-                                IAmbulanceRepository ambulanceRepository,
                                 IItemRepository itemRepository,
-                                IUserRepository userRepository,
                                 IHttpContextAccessor httpContextAccessor)
         {
             _checklistRepository = checklistRepository;
             _categoryRepository = categoryRepository;
-            _ambulanceRepository = ambulanceRepository;
             _itemRepository = itemRepository;
-            _userRepository = userRepository;
             _httpContextAccessor = httpContextAccessor;
         }
 
         private ISession _session => _httpContextAccessor.HttpContext.Session;
-
-        public Task<ResponseDTO> Create(BasicDTO basicDTO)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ResponseDTO> Update(int id, BasicDTO basicDTO)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<ResponseDTO> Remove(int id)
         {
             ResponseDTO responseDTO = new();
             try
             {
-                var ambulanceExists = await _ambulanceRepository.GetEntities().AnyAsync(x => x.Checklist.Id == id);
-                if (ambulanceExists)
-                {
-                    responseDTO.SetBadInput("Não é possível apagar o checklist, já existe uma ambulância vinculada!");
-                    return responseDTO;
-                }
-
                 var checklist = await _checklistRepository.GetTrackedEntities().FirstOrDefaultAsync(c => c.Id == id);
                 if (checklist == null)
                 {
@@ -83,6 +60,7 @@ namespace ItsCheck.Service
             {
                 var checklists = await _checklistRepository.GetEntities()
                     .Include(x => x.ChecklistItems).ThenInclude(x => x.Item)
+                    .Include(x => x.ChecklistItems).ThenInclude(x => x.ChildChecklistItems).ThenInclude(x => x.Item)
                     .Include(x => x.ChecklistItems).ThenInclude(x => x.Category)
                     .ToListAsync();
 
@@ -93,6 +71,7 @@ namespace ItsCheck.Service
                     checklist.UpdatedAt,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
+                            .Where(x => x.ParentChecklistItemId == null)
                             .Select(item => new
                             {
                                 id = item.Category.Id,
@@ -103,7 +82,13 @@ namespace ItsCheck.Service
                                     {
                                         id = item.Item.Id,
                                         name = item.Item.Name,
-                                        amountRequired = item.AmountRequired
+                                        amountRequired = item.AmountRequired,
+                                        childItems = item.ChildChecklistItems != null && item.ChildChecklistItems.Count != 0 ? item.ChildChecklistItems.Select(x=>new
+                                        {
+                                            id = x.Item.Id,
+                                            name = x.Item.Name,
+                                            amountRequired = x.AmountRequired
+                                        }) : []
                                     }
                                 }
                             })
@@ -150,7 +135,7 @@ namespace ItsCheck.Service
                 var checklist = new Checklist
                 {
                     Name = checklistDTO.Name,
-                    ChecklistItems = new List<ChecklistItem>()
+                    ChecklistItems = []
                 };
 
                 await ProcessChecklistItems(checklistDTO, checklist);
@@ -191,6 +176,27 @@ namespace ItsCheck.Service
                     };
                     checklistItem.SetCreatedAt();
                     checklist.ChecklistItems.Add(checklistItem);
+
+                    if (itemDTO.ChildItems != null && itemDTO.ChildItems.Count != 0)
+                    {
+                        foreach (var subItemDTO in itemDTO.ChildItems)
+                        {
+                            var subItem = await _itemRepository.GetTrackedEntities()
+                                                    .FirstOrDefaultAsync(x => x.Id == subItemDTO.Id) ??
+                                                    throw new Exception($"O item {subItemDTO.Id} não existe");
+                            var subChecklistItem = new ChecklistItem()
+                            {
+                                Category = category,
+                                Checklist = checklist,
+                                Item = subItem,
+                                ParentChecklistItem = checklistItem,
+                                AmountRequired = itemDTO.AmountRequired,
+                                TenantId = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId))
+                            };
+                            subChecklistItem.SetCreatedAt();
+                            checklist.ChecklistItems.Add(subChecklistItem);
+                        }
+                    }
                 }
             }
         }
@@ -250,6 +256,7 @@ namespace ItsCheck.Service
                     checklist.UpdatedAt,
                     name = checklist.Name,
                     categories = checklist.ChecklistItems
+                        .Where(x => x.ParentChecklistItemId == null)
                         .Select(item => new
                         {
                             id = item.Category.Id,
@@ -260,7 +267,13 @@ namespace ItsCheck.Service
                                 {
                                     id = item.Item.Id,
                                     name = item.Item.Name,
-                                    amountRequired = item.AmountRequired
+                                    amountRequired = item.AmountRequired,
+                                    childItems = item.ChildChecklistItems != null && item.ChildChecklistItems.Count != 0 ? item.ChildChecklistItems.Select(x=>new
+                                    {
+                                        id = x.Item.Id,
+                                        name = x.Item.Name,
+                                        amountRequired = x.AmountRequired
+                                    }) : []
                                 }
                             }
                         })
@@ -285,56 +298,57 @@ namespace ItsCheck.Service
 
         public async Task<ResponseDTO> GetByAmbulanceId()
         {
-            ResponseDTO responseDTO = new();
-            try
-            {
-                var user = await _userRepository.GetEntities()
-                    .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Category)
-                    .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Item)
-                        .FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
+            //ResponseDTO responseDTO = new();
+            //try
+            //{
+            //    var user = await _userRepository.GetEntities()
+            //        .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Category)
+            //        .Include(x => x.Ambulance).ThenInclude(x => x.Checklist).ThenInclude(x => x.ChecklistItems).ThenInclude(x => x.Item)
+            //            .FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
 
-                if (user == null || user.Ambulance == null || user.Ambulance.Checklist == null)
-                {
-                    responseDTO.SetNotFound();
-                    return responseDTO;
-                }
+            //    if (user == null || user.Ambulance == null || user.Ambulance.Checklist == null)
+            //    {
+            //        responseDTO.SetNotFound();
+            //        return responseDTO;
+            //    }
 
-                var jsonData = new
-                {
-                    id = user.Ambulance?.Checklist.Id,
-                    name = user.Ambulance?.Checklist.Name,
-                    categories = user.Ambulance?.Checklist.ChecklistItems
-                        .Select(item => new
-                        {
-                            id = item.Category.Id,
-                            name = item.Category.Name,
-                            items = new List<object>
-                            {
-                                new
-                                {
-                                    id = item.Item.Id,
-                                    name = item.Item.Name,
-                                    amountRequired = item.AmountRequired
-                                }
-                            }
-                        })
-                        .GroupBy(category => new { category.id, category.name })
-                        .Select(groupedCategory => new
-                        {
-                            groupedCategory.Key.id,
-                            groupedCategory.Key.name,
-                            items = groupedCategory.SelectMany(category => category.items)
-                        })
-                };
+            //    var jsonData = new
+            //    {
+            //        id = user.Ambulance?.Checklist.Id,
+            //        name = user.Ambulance?.Checklist.Name,
+            //        categories = user.Ambulance?.Checklist.ChecklistItems
+            //            .Select(item => new
+            //            {
+            //                id = item.Category.Id,
+            //                name = item.Category.Name,
+            //                items = new List<object>
+            //                {
+            //                    new
+            //                    {
+            //                        id = item.Item.Id,
+            //                        name = item.Item.Name,
+            //                        amountRequired = item.AmountRequired
+            //                    }
+            //                }
+            //            })
+            //            .GroupBy(category => new { category.id, category.name })
+            //            .Select(groupedCategory => new
+            //            {
+            //                groupedCategory.Key.id,
+            //                groupedCategory.Key.name,
+            //                items = groupedCategory.SelectMany(category => category.items)
+            //            })
+            //    };
 
-                responseDTO.Object = jsonData;
-            }
-            catch (Exception ex)
-            {
-                responseDTO.SetError(ex);
-            }
+            //    responseDTO.Object = jsonData;
+            //}
+            //catch (Exception ex)
+            //{
+            //    responseDTO.SetError(ex);
+            //}
 
-            return responseDTO;
+            //return responseDTO;
+            throw new Exception("Método desativado devido ao MVP");
         }
     }
 }
