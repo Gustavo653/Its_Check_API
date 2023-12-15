@@ -4,11 +4,11 @@ namespace ItsCheck.DTO
 {
     public class ChecklistReplacedItemDTO
     {
-        [Required] 
+        [Required]
         public int AmountReplaced { get; set; }
-        [Required] 
+        [Required]
         public int IdChecklistItem { get; set; }
-        [Required] 
+        [Required]
         public int IdChecklistReview { get; set; }
     }
 }

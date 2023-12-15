@@ -1,4 +1,3 @@
-using ItsCheck.DTO;
 using ItsCheck.DTO.Base;
 using ItsCheck.Infrastructure.Base;
 

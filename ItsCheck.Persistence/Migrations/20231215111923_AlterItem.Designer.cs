@@ -3,6 +3,7 @@ using System;
 using ItsCheck.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ItsCheck.Persistence.Migrations
 {
     [DbContext(typeof(ItsCheckContext))]
-    partial class ItsCheckContextModelSnapshot : ModelSnapshot
+    [Migration("20231215111923_AlterItem")]
+    partial class AlterItem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,6 +57,41 @@ namespace ItsCheck.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Ambulances");
+                });
+
+            modelBuilder.Entity("ItsCheck.Domain.AmbulanceChecklistXRef", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AmbulanceId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ChecklistId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AmbulanceId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("ChecklistId", "AmbulanceId", "TenantId")
+                        .IsUnique();
+
+                    b.ToTable("AmbulanceChecklistXRefs");
                 });
 
             modelBuilder.Entity("ItsCheck.Domain.Category", b =>
@@ -528,6 +566,33 @@ namespace ItsCheck.Persistence.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ItsCheck.Domain.AmbulanceChecklistXRef", b =>
+                {
+                    b.HasOne("ItsCheck.Domain.Ambulance", "Ambulance")
+                        .WithMany("AmbulanceChecklistXRefs")
+                        .HasForeignKey("AmbulanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ItsCheck.Domain.Checklist", "Checklist")
+                        .WithMany("AmbulanceChecklistXRefs")
+                        .HasForeignKey("ChecklistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ItsCheck.Domain.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ambulance");
+
+                    b.Navigation("Checklist");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ItsCheck.Domain.Category", b =>
                 {
                     b.HasOne("ItsCheck.Domain.Tenant", "Tenant")
@@ -728,8 +793,15 @@ namespace ItsCheck.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ItsCheck.Domain.Ambulance", b =>
+                {
+                    b.Navigation("AmbulanceChecklistXRefs");
+                });
+
             modelBuilder.Entity("ItsCheck.Domain.Checklist", b =>
                 {
+                    b.Navigation("AmbulanceChecklistXRefs");
+
                     b.Navigation("ChecklistItems");
                 });
 

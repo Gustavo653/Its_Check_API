@@ -1,7 +1,6 @@
 ﻿using ItsCheck.Domain;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Persistence;
-using Microsoft.AspNetCore.Http;
 
 namespace ItsCheck.DataAccess
 {

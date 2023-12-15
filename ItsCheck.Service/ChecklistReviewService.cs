@@ -1,12 +1,10 @@
 using ItsCheck.Domain;
-using ItsCheck.Domain.Identity;
 using ItsCheck.DTO;
 using ItsCheck.DTO.Base;
 using ItsCheck.Infrastructure.Repository;
 using ItsCheck.Infrastructure.Service;
 using ItsCheck.Utils;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ItsCheck.Service
@@ -64,21 +62,6 @@ namespace ItsCheck.Service
                 if (ambulance == null)
                 {
                     responseDTO.SetBadInput($"A ambulância {checklistReviewDTO.IdAmbulance} não existe!");
-                    return responseDTO;
-                }
-
-                //TODO: Criar checklist completo e parcial
-
-                var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
-                                                            .FirstOrDefaultAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
-                                                                                      x.Ambulance.Id == checklistReviewDTO.IdAmbulance &&
-                                                                                      x.User.Id == checklistReviewDTO.IdUser &&
-                                                                                      x.Type == Domain.Enum.ReviewType.Initial &&
-                                                                                      checklistReviewDTO.Type == Domain.Enum.ReviewType.Initial);
-
-                if (checklistReviewInitialDuplicated != null)
-                {
-                    responseDTO.SetBadInput($"Um checklist inicial foi criado há pouco tempo ({checklistReviewInitialDuplicated.CreatedAt})!");
                     return responseDTO;
                 }
 
@@ -225,7 +208,7 @@ namespace ItsCheck.Service
                                                                          User = x.User.Name,
                                                                          x.Checklist,
                                                                          ChecklistReviews = x.ChecklistReplacedItems != null &&
-                                                                                            x.ChecklistReplacedItems.Any() ?
+                                                                                            x.ChecklistReplacedItems.Count != 0 ?
                                                                                             x.ChecklistReplacedItems.Select(x => new
                                                                                             {
                                                                                                 category = x.ChecklistItem.Category.Name,
@@ -246,25 +229,26 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
-        public async Task<ResponseDTO> ExistsChecklistReview()
+        public Task<ResponseDTO> ExistsChecklistReview()
         {
-            ResponseDTO responseDTO = new();
-            try
-            {
-                var user = await _userRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
-                var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
-                                             .AnyAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
-                                                            x.User.Id == user!.Id &&
-                                                            x.Type == Domain.Enum.ReviewType.Initial);
+            //ResponseDTO responseDTO = new();
+            //try
+            //{
+            //    var user = await _userRepository.GetEntities().FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(_session.GetString(Consts.ClaimUserId)));
+            //    var checklistReviewInitialDuplicated = await _checklistReviewRepository.GetEntities()
+            //                                 .AnyAsync(x => x.CreatedAt > DateTime.Now.AddHours(-12) &&
+            //                                                x.User.Id == user!.Id &&
+            //                                                x.Type == Domain.Enum.ReviewType.Initial);
 
-                responseDTO.Object = checklistReviewInitialDuplicated;
-            }
-            catch (Exception ex)
-            {
-                responseDTO.SetError(ex);
-            }
+            //    responseDTO.Object = checklistReviewInitialDuplicated;
+            //}
+            //catch (Exception ex)
+            //{
+            //    responseDTO.SetError(ex);
+            //}
 
-            return responseDTO;
+            //return responseDTO;
+            throw new Exception("Método desativado devido ao MVP");
         }
     }
 }
