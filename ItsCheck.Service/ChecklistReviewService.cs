@@ -93,9 +93,65 @@ namespace ItsCheck.Service
             return responseDTO;
         }
 
+        private static void ValidateCategoryExists(ChecklistReviewDTO checklistReviewDTO, int categoryId)
+        {
+            if (!checklistReviewDTO.Categories.Any(x => x.Id == categoryId))
+            {
+                throw new Exception($"A categoria {categoryId} deve ser conferida");
+            }
+        }
+
+        private static void ValidateItemExists(CategoryReviewDTO category, int itemId)
+        {
+            if (!category.Items.Any(i => i.Id == itemId))
+            {
+                throw new Exception($"O item {itemId} deve ser conferido");
+            }
+        }
+
+        private static void ValidateChildItemsExist(ItemReviewDTO itemDTO, List<int>? childItemIds)
+        {
+            if (itemDTO.ChildItems == null || itemDTO.ChildItems.Count == 0)
+                throw new Exception($"O checklist selecionado possui subitens");
+
+            if (childItemIds != null)
+            {
+                foreach (var childItemId in childItemIds)
+                {
+                    if (!itemDTO.ChildItems.Any(i => i.Id == childItemId))
+                    {
+                        throw new Exception($"O item {childItemId} deve ser conferido");
+                    }
+                }
+            }
+        }
+
+
         private async Task ProcessChecklistReviewItems(ChecklistReviewDTO checklistReviewDTO, ChecklistReview checklistReview)
         {
-            //TODO: Implementar lógica de full e partial
+            if (checklistReviewDTO.Type == Domain.Enum.ReviewType.Full)
+            {
+                var checklist = await _checklistItemRepository.GetEntities()
+                                                             .Where(x => x.ChecklistId == checklistReviewDTO.IdChecklist && x.ParentChecklistItem == null)
+                                                             .Select(x => new
+                                                             {
+                                                                 x.CategoryId,
+                                                                 x.ItemId,
+                                                                 ChildItemIds = x.ChildChecklistItems != null && x.ChildChecklistItems.Count > 0 ?
+                                                                                x.ChildChecklistItems.Select(c => c.ItemId).ToList() : null,
+                                                             })
+                                                             .ToListAsync();
+
+                foreach (var item in checklist)
+                {
+                    ValidateCategoryExists(checklistReviewDTO, item.CategoryId);
+                    var categoryReviewDTO = checklistReviewDTO.Categories.First(x => x.Id == item.CategoryId);
+                    ValidateItemExists(categoryReviewDTO, item.ItemId);
+                    var itemReviewDTO = categoryReviewDTO.Items.First(i => i.Id == item.ItemId);
+                    ValidateChildItemsExist(itemReviewDTO, item.ChildItemIds);
+                }
+            }
+
             foreach (var categoryReviewDTO in checklistReviewDTO.Categories)
             {
                 var category = await _categoryRepository.GetTrackedEntities()
