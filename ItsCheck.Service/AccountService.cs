@@ -136,7 +136,7 @@ namespace ItsCheck.Service
                 }
                 else
                 {
-                    userDTO.IdTenant = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId) ?? userDTO.IdTenant);
+                    userDTO.IdTenant = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId) ?? userDTO.IdTenant.ToString());
                 }
 
                 var user = await _userManager.FindByEmailAsync(userDTO.Email);
@@ -199,7 +199,7 @@ namespace ItsCheck.Service
                 }
                 else
                 {
-                    userDTO.IdTenant = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId) ?? userDTO.IdTenant);
+                    userDTO.IdTenant = Convert.ToInt32(_session.GetString(Consts.ClaimTenantId) ?? userDTO.IdTenant.ToString());
                 }
 
                 var userEntity = await _userRepository.GetTrackedEntities().FirstOrDefaultAsync(x => x.Id == id);
