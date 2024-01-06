@@ -62,6 +62,7 @@ namespace ItsCheck.Service
                 }
 
                 ambulance.Number = ambulanceDTO.Number;
+                ambulance.LicensePlate = ambulanceDTO.LicensePlate;
                 ambulance.SetUpdatedAt();
 
                 await _ambulanceRepository.SaveChangesAsync();
